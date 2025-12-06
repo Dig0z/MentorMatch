@@ -1,0 +1,229 @@
+/* ====== Light Mode Base ====== */
+
+body {
+    background: linear-gradient(135deg, #f5f7fa, #ffffff);
+    color: #2d2d2d;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ====== Card ====== */
+
+.card {
+    border: none;
+    border-radius: 15px;
+    padding: 30px;
+    background: #ffffff;
+    box-shadow: 0 0 18px rgba(0,0,0,0.08);
+}
+
+/* ====== Logo Placeholder ====== */
+
+.logo-placeholder {
+    width: 40px;
+    height: 40px;
+    background-color: #dcdcdc;
+    border-radius: 6px;
+}
+
+/* ====== Titles ====== */
+
+h1, h2, h3 {
+    color: #222;
+    font-weight: 600;
+}
+
+/* ====== Labels ====== */
+
+.form-label {
+    font-weight: 500;
+    color: #333;
+}
+
+/* ====== Inputs ====== */
+
+.form-control {
+    background-color: #f7f7f7;
+    color: #222;
+    border: 1px solid #cccccc;
+    border-radius: 10px;
+    padding: 12px;
+    transition: 0.2s;
+}
+
+.form-control::placeholder {
+    color: #999;
+}
+
+.form-control:focus {
+    background-color: #fafafa;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 0.15rem rgba(74, 144, 226, 0.3);
+}
+
+/* ====== Buttons ====== */
+
+.btn-primary {
+    background-color: #4a90e2;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: 0.2s;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3a7ac5;
+}
+
+.btn-outline-primary {
+    border-radius: 10px;
+    padding: 10px 22px;
+    border-width: 2px;
+    border-color: #4a90e2;
+    color: #4a90e2;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.btn-outline-primary:hover {
+    background-color: #4a90e2;
+    color: white;
+}
+
+/* ====== Navbar Light Mode ====== */
+
+.navbar-light {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e3e3e3;
+}
+
+.navbar-light .nav-link {
+    color: #333 !important;
+    font-weight: 500;
+}
+
+.navbar-light .nav-link:hover {
+    color: #4a90e2 !important;
+}
+
+.navbar-light .navbar-brand {
+    color: #222 !important;
+    font-weight: 600;
+}
+
+/* ====== Logout Item ====== */
+
+.nav-link.text-danger {
+    font-weight: 600;
+}
+
+/* ====== Responsive Card Fix ====== */
+
+@media(max-width: 576px) {
+    .card {
+        width: 100% !important;
+        margin: 0 15px;
+        padding: 25px;
+    }
+}
+
+/* ===== HERO SECTION LIGHT ===== */
+
+.hero-section-light {
+    background: linear-gradient(135deg, #ffffff, #f1f4f9);
+    padding: 120px 20px;
+}
+
+.hero-section-light h1 {
+    color: #222;
+}
+
+.hero-section-light p {
+    color: #555;
+}
+
+/* ===== VALUES SECTION LIGHT ===== */
+
+.values-section-light {
+    background: #ffffff;
+    border-top: 1px solid #e4e4e4;
+}
+
+.value-box-light {
+    background: #f9f9f9;
+    border: 1px solid #dddddd;
+    transition: 0.2s;
+}
+
+.value-box-light:hover {
+    transform: translateY(-3px);
+    background: #ffffff;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
+
+/* ===== PROFILE PICTURE LIGHT ===== */
+
+.profile-pic-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-pic {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+
+    border-radius: 15px;
+    border: 3px solid #e6e6e6;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profile-pic:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 22px rgba(0,0,0,0.18);
+}
+
+
+/* ===== Responsive fix for FullCalendar ===== */
+
+@media (max-width: 576px) {
+
+    /* El contenedor no debe tener padding exagerado */
+    #calendar, 
+    #calendar-small,
+    #calendar-big {
+        padding: 0 !important;
+    }
+
+    /* Ajusta botones y títulos */
+    .fc-toolbar.fc-header-toolbar {
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+    }
+
+    .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+    }
+
+    /* El calendario debe ocupar todo el ancho disponible */
+    .fc {
+        font-size: 0.75rem; /* reduce texto */
+    }
+
+    /* Las celdas se achican pero mantienen forma */
+    .fc-daygrid-day {
+        padding: 2px !important;
+    }
+
+    /* Quita scroll lateral */
+    .fc-scroller {
+        overflow: hidden !important;
+    }
+}
