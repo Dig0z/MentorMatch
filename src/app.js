@@ -1,12 +1,13 @@
-require('dotenv').config();
+require('dotenv').config({path: '../.env'});
 const express = require('express');
-const app = Express();
+const app = express();
 
-require('config.js');
+require('./config/db.js');
 
 app.use(express.json());
 
 const PORT = (process.env.PORT || 3000);
+
 app.listen(PORT, () => {
-    console.log('Server listening on port ${PORT}');
+    console.log(`Server listening on port ${PORT}`);
 });
