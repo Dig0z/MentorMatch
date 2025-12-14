@@ -10,6 +10,8 @@ Pacchetti principali usati nel progetto:
 npm install express 
 npm install pg 
 npm install dotenv
+npm install jsonwebtoken
+npm install bcrypt
 
 ## Installazione (rapida)
 
