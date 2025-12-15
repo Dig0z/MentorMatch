@@ -18,7 +18,7 @@ async function register_user(name, surname, email, password_hash, role, bio, pho
 
 async function get_login_data(email) {
     const res = `
-    SELECT password_hash
+    SELECT id, password_hash
     FROM users
     WHERE email LIKE '$1'
     `;

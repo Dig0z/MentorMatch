@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const user_service = require('../services/user_service.js');
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', async (req, res) => {
     const {user, token} = await user_service.register(req.body);
     res.status(201).json({
         message: 'User succesfully created',
@@ -11,13 +11,15 @@ router.post('/register', async (req, res, next) => {
     });
 });
 
-router.post('/login', async (req, res, next) => {
-    const result = user_service.login(req.body);
-    res.status(200).json({
-        message: 'Login succesful',
-        success: true,
-        data: result
-    });
+router.post('/login', async (req, res) => {
+    const {valid, token} = user_service.login(req.body);
+    if(valid) {
+        res.status(200).json({
+            message: 'Login succesful',
+            success: true,
+            data: token
+        });
+    }
 });
 
 

@@ -10,17 +10,23 @@ async function register(user_data) {
     const password_hash = await bcrypt.hash(password, saltRounds);
     const user = await user_repository.register_user(name, surname, email, password_hash, role, bio, photo_url);
     const token = jwt.sign(
-        {id: user.id, email: user.email, role: user.role},
+        {id: user.id},
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     );
     return {user, token};
 };
 
-async function login(user_data) {
-    const {email, password} = user_data;
-    const password_hash = await user_repository.get_login_data(email);
-    return await bcrypt.compare(password, password_hash);
+async function login(login_data) {
+    const {email, password} = login_data;
+    const {id, password_hash} = await user_repository.get_login_data(email);
+    const valid = await bcrypt.compare(password, password_hash);
+    const token = jwt.sign(
+        {id: id},
+        process.env.JWT_SECRET,
+        {expiresIn: '1h'}
+    );
+    return {valid, token};
 };
 
 module.exports = {
