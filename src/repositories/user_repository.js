@@ -1,4 +1,5 @@
-const {pool} = require('../config/db.js')
+const path = require('path');
+const {pool} = require({path: path.resolve(__dirname, '..', './config/db.js')});
 
 async function get_users() {
     const res = 
@@ -13,19 +14,19 @@ async function register_user(name, surname, email, password_hash, role, bio, pho
     VALUES($1, $2, $3, $4,$5, $6, $7)
     RETURNING *
     `;
-    return await db.query(res, [name, surname, email, password_hash, role, bio, photo_url]);
+    return await pool.query(res, [name, surname, email, password_hash, role, bio, photo_url]);
 };
 
 async function get_login_data(email) {
     const res = `
     SELECT id, password_hash
     FROM users
-    WHERE email LIKE '$1'
+    WHERE email LIKE $1
     `;
-    return await db.query(res, [email]);
+    return await pool.query(res, [email]);
 };
 
-modules.exports = {
+module.exports = {
     get_users,
     register_user,
     get_login_data

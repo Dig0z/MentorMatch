@@ -1,14 +1,16 @@
-require('dotenv').config({path: '../.env'});
+const path = require('path');
+require('dotenv').config({path: path.resolve(__dirname, '..', '.env')});
 const express = require('express');
 const app = express();
-const router = express.Router();
 
 require('./config/db.js');
 
 app.use(express.json());
-router.use('/api', './routes.js');
 
-const PORT = (process.env.DB_PORT || 3000);
+const routes = require('./routes.js');
+app.use('/api', routes);
+
+const PORT = (process.env.PORT || 3000);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
