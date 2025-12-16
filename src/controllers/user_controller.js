@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const user_service = require('../services/user_service.js');
 
+router.get('/test', async(req, res) => {
+    res.status(201).json({message: 'Endpoint works'});
+})
+
 router.post('/register', async (req, res) => {
     const {user, token} = await user_service.register(req.body);
     res.status(201).json({
