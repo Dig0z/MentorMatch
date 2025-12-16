@@ -9,6 +9,7 @@ async function register(user_data) {
     const {name, surname, email, password, role, bio = null, photo_url = null} = user_data;
     const password_hash = await bcrypt.hash(password, saltRounds);
     const user = await user_repository.register_user(name, surname, email, password_hash, role, bio, photo_url);
+    console.log('User created');
     const token = jwt.sign(
         {id: user.id},
         process.env.JWT_SECRET,
