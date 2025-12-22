@@ -11,4 +11,4 @@ const login_dto = {
     }
 };
 
-module.exports = {login_dto};
+module.exports = login_dto;

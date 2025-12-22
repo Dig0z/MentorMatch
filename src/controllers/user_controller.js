@@ -9,7 +9,7 @@ router.get('/test', async(req, res) => {
     res.status(201).json({message: 'Endpoint works'});
 })
 
-router.post('/register', validate.validate_dto(register_dto, req, res, next), async (req, res) => {
+router.post('/register', validate(register_dto), async (req, res) => {
     const {user, token} = await user_service.register(req.body);
     res.status(201).json({
         message: 'User succesfully created',
@@ -18,7 +18,7 @@ router.post('/register', validate.validate_dto(register_dto, req, res, next), as
     });
 });
 
-router.post('/login', validate.validate_dto(login_dto, req, res, next), async (req, res) => {
+router.post('/login', validate(login_dto), async (req, res) => {
     const payload = await user_service.login(req.body);
     const {valid, token} = payload;
     if(valid) {

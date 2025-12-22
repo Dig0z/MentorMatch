@@ -32,4 +32,4 @@ const register_dto = {
     }
 }
 
-module.exports = {register_dto};
+module.exports = register_dto;

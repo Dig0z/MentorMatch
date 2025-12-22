@@ -1,40 +1,64 @@
-function validate_dto(dto, req, res, next) {
-    const payload = req.body;
-    //invece di mandare subito l'errore, si salvano tutti man mano
-    //in un vettore e si stampano tutti insieme alla fine del check
-    const errors = [];
+function validate_dto(dto) {
 
-    for(i in dto) {
-        check = dto[i];
-        value = payload[i];
+    // Ritorna una funzione middleware che riceve (req, res, next)
+    return (req, res, next) => {
+        const payload = req.body;
+        //invece di mandare subito l'errore, si salvano tutti man mano
+        //in un vettore e si stampano tutti insieme alla fine del check
+        const errors = [];
 
-        if(check.required && (value == null || value == undefined || value.length < 1))
-            errors.push(new Error(`Missing ${i}`));
+        for(let i in dto) {
+            const check = dto[i];
+            const value = payload[i];
 
-        if(check.max_length && value.length > check.max_length)
-            errors.push(new Error(`${i} max length is ${check.max_length}`));
+            if(check.required && (value == null || value == undefined || (typeof value === 'string' && value.length < 1))) {
+                errors.push({
+                    status: 400,
+                    message: `Missing ${i}`
+                });
+            }
 
-        if(check.min_length && value.length < check.min_length)
-            errors.push(new Error(`${i} min length is ${check.min_length}`));
+            if(check.max_length && value && value.length > check.max_length) {
+                errors.push({
+                    status: 400, 
+                    message: `${i} max length is ${check.max_length}`
+                });
+            }
 
-        if(check.pattern && !check.pattern.test(value))
-            errors.push(new Error(`Wrong pattern in ${i}`));
+            if(check.min_length && value && value.length < check.min_length) {
+                errors.push({
+                    status: 400,
+                    message: `${i} min length is ${check.min_length}`
+                });
+            }
 
-        if(check.accepted_values && !check.accepted_values.includes(value)) {
-            let ac_val = '';
-            for(v in check.accepted_values)
-                ac_val += '\n' + check.accepted_values[v];
-            errors.push(new Error(`${i} value must be one of the following: ${ac_val}`));
+            if(check.pattern && value && !check.pattern.test(value)) {
+                errors.push({
+                    status: 400,
+                    message: `Wrong pattern in ${i}`
+                });
+            }
+
+            if(check.accepted_values && value && !check.accepted_values.includes(value)) {
+                let ac_val = '';
+                for(v in check.accepted_values)
+                    ac_val += '\n' + check.accepted_values[v];
+                errors.push({
+                    status: 400,
+                    message: `${i} value must be one of the following: ${ac_val}`
+                });
+            }
         }
 
         if(errors.length > 0) {
-            for(i in errors)
-                throw new Error(errors[i].toString());
+            const err = new Error('Incorrect request');
+            err.status = 400;
+            err.details = errors;
+            return next(err);
         }
 
         next();
-
-    }
+    };
 };
 
-module.exports = {validate_dto};
+module.exports = validate_dto;
