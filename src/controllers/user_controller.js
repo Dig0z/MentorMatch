@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const user_service = require('../services/user_service.js');
+const validate = require('../dtos/dto_middleware.js');
+const register_dto = require('../dtos/user/register_dto.js');
+const login_dto = require('../dtos/user/login_dto.js');
 
 router.get('/test', async(req, res) => {
     res.status(201).json({message: 'Endpoint works'});
 })
 
-router.post('/register', async (req, res) => {
+router.post('/register', validate.validate_dto(register_dto, req, res, next), async (req, res) => {
     const {user, token} = await user_service.register(req.body);
     res.status(201).json({
         message: 'User succesfully created',
@@ -15,12 +18,13 @@ router.post('/register', async (req, res) => {
     });
 });
 
-router.post('/login', async (req, res) => {
-    const {valid, token} = user_service.login(req.body);
+router.post('/login', validate.validate_dto(login_dto, req, res, next), async (req, res) => {
+    const payload = await user_service.login(req.body);
+    const {valid, token} = payload;
     if(valid) {
         res.status(200).json({
             message: 'Login succesful',
-            success: true,
+            success: valid,
             data: token
         });
     }

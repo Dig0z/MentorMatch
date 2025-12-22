@@ -23,7 +23,8 @@ async function get_login_data(email) {
     FROM users
     WHERE email LIKE $1
     `;
-    return await pool.query(query, [email]);
+    const result = await pool.query(query, [email]);
+    return result.rows[0];
 };
 
 module.exports = {
