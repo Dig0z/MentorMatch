@@ -20,8 +20,19 @@ async function register(user_data) {
 
 async function login(login_data) {
     const {email, password} = login_data;
-    const {id, password_hash} = await user_repository.get_login_data(email);
+    const identity = await user_repository.get_login_data(email);
+    if(!identity) {
+        const err = new Error('Email is not registered');
+        err.status = 400;
+        throw err;
+    }
+    const {id, password_hash} = identity;
     const valid = await bcrypt.compare(password, password_hash);
+    if(!valid) {
+        const err = new Error('Invalid password');
+        err.status = 400;
+        throw err;
+    }
     const token = jwt.sign(
         {id: id},
         process.env.JWT_SECRET,
