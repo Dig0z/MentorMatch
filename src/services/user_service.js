@@ -41,7 +41,14 @@ async function login(login_data) {
     return {valid, token};
 };
 
+async function get_mentors(filters) {
+    const {name = null, surname = null, email = null, availability_day = null, sector = null, last_id = 0, limit = 20} = filters;
+    const result = await user_repository.get_mentors(name, surname, email, availability_day, sector, last_id, limit);
+    return result;
+}
+
 module.exports = {
     register,
-    login
+    login,
+    get_mentors
 };

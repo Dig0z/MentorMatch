@@ -1,8 +1,8 @@
-function validate_dto(dto) {
+function validate_dto(dto, source = 'body') {
 
     // Ritorna una funzione middleware che riceve (req, res, next)
     return (req, res, next) => {
-        const payload = req.body;
+        const payload = req[source];
         //invece di mandare subito l'errore, si salvano tutti man mano
         //in un vettore e si stampano tutti insieme alla fine del check
         const errors = [];
@@ -47,6 +47,15 @@ function validate_dto(dto) {
                     status: 400,
                     message: `${i} value must be one of the following: ${ac_val}`
                 });
+            }
+
+            if(check.type) {
+                if(check.type == 'number' && typeof Number(value) != 'number') {
+                    errors.push({
+                        status: 400,
+                        message: `${i} must be a ${check.type}`
+                    });
+                }
             }
         }
 
