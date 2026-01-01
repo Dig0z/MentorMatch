@@ -4,6 +4,7 @@ const user_service = require('../services/user_service.js');
 const validate = require('../dtos/dto_middleware.js');
 const register_dto = require('../dtos/user/register_dto.js');
 const login_dto = require('../dtos/user/login_dto.js');
+const get_mentors_dto = require('../dtos/user/get_mentors_dto.js');
 
 router.get('/test', async(req, res) => {
     res.status(201).json({message: 'Endpoint works'});
@@ -28,6 +29,16 @@ router.post('/login', validate(login_dto), async (req, res) => {
             data: token
         });
     }
+});
+
+router.get('/get_mentors', validate(get_mentors_dto), async (req, res) => {
+    const mentor_list = await user_service.get_mentors(req.query);
+    const n = mentor_list.length;
+    res.status(200).json({
+        message: n + ' mentors found',
+        success: true,
+        data: mentor_list
+    });
 });
 
 
