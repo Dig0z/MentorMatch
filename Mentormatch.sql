@@ -23,8 +23,8 @@ CREATE TABLE mentor_availability (
     id          SERIAL PRIMARY KEY,
     mentor_id   INT NOT NULL,
     weekday     INT NOT NULL CHECK (weekday BETWEEN 1 AND 7),
-    start_time  TIME NOT NULL,
-    end_time    TIME NOT NULL,
+    start_time  TIMESTAMP NOT NULL,
+    end_time    TIMESTAMP NOT NULL,
     FOREIGN KEY (mentor_id) REFERENCES users(id)
         ON DELETE CASCADE,
     CHECK (start_time < end_time)
@@ -56,5 +56,14 @@ CREATE TABLE reviews (
     FOREIGN KEY (mentor_id) REFERENCES users(id)
         ON DELETE CASCADE,
     FOREIGN KEY (mentee_id) REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE notifies (
+    id          SERIAL PRIMARY KEY,
+    user_id     INT NOT NULL,
+    message     TEXT,
+    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
 );
