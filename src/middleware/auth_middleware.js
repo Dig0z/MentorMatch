@@ -5,7 +5,7 @@ function auth(req, res, next) {
 
     //prendo l'header che dovrebbe contenere il jwt
     //e dovrei ottenere la stringa: 'Bearer <jwt>'
-    const header = req.getHeaders['authorization'];
+    const header = req.get('authorization');
 
     //verifico che sia effettivamente presente
     if(!header) {
