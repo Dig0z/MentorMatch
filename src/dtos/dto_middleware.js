@@ -3,6 +3,12 @@ function validate_dto(dto, source = 'body') {
     // Ritorna una funzione middleware che riceve (req, res, next)
     return (req, res, next) => {
         const payload = req[source];
+        if(source == 'query' && !payload) {
+            //se non ci sono query params, non c'è niente da validare
+            next();
+            return;
+        }
+        console.log(payload);
         //invece di mandare subito l'errore, si salvano tutti man mano
         //in un vettore e si stampano tutti insieme alla fine del check
         const errors = [];

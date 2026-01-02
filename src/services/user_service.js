@@ -41,9 +41,8 @@ async function login(login_data) {
     return {valid, token};
 };
 
-async function update_name(user_data) {
+async function update_name(user_id, user_data) {
     const {new_name} = user_data;
-    const user_id = user_data.user.id;
     const result = await user_repository.update_name(user_id, new_name);
     if(!result) {
         const err = new Error('User not found');
@@ -53,9 +52,8 @@ async function update_name(user_data) {
     return result;
 };
 
-async function update_surname(user_data) {
+async function update_surname(user_id, user_data) {
     const {new_surname} = user_data;
-    const user_id = user_data.user.id;
     const result = await user_repository.update_name(user_id, new_surname);
     if(!result) {
         const err = new Error('User not found');
@@ -65,9 +63,8 @@ async function update_surname(user_data) {
     return result;
 };
 
-async function update_bio(user_data) {
+async function update_bio(user_id, user_data) {
     const {new_bio} = user_data;
-    const user_id = user_data.user.id;
     const result = await user_repository.update_name(user_id, new_bio);
     if(!result) {
         const err = new Error('User not found');
@@ -77,9 +74,8 @@ async function update_bio(user_data) {
     return result;
 };
 
-async function update_photo_url(user_data) {
+async function update_photo_url(user_id, user_data) {
     const {new_url} = user_data;
-    const user_id = user_data.user.id;
     const result = await user_repository.update_name(user_id, new_url);
     if(!result) {
         const err = new Error('User not found');
@@ -98,5 +94,9 @@ async function get_mentors(filters) {
 module.exports = {
     register,
     login,
-    get_mentors
+    get_mentors,
+    update_name,
+    update_surname,
+    update_bio,
+    update_photo_url
 };

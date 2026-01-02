@@ -28,6 +28,7 @@ const register_dto = {
     },
     photo_url: {
         required: false,
+        //dev'essere per forza un url del tipo /url... e termine con un'estensione valida
         pattern: /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i
     }
 }

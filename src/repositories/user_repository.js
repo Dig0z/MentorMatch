@@ -50,19 +50,19 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     if(name) {
         values.push(name);
         index++;
-        query += ` AND u.name LIKE CONCAT('%', $${index}, '%')`;
+        query += ` AND u.name LIKE '%' || $${index} || '%'`;
     }
 
     if(surname) {
         values.push(surname);
         index++;
-        query += ` AND u.surname LIKE CONCAT('%', $${index}, '%')`;
+        query += ` AND u.surname LIKE '%' || $${index} || '%'`;
     }
 
     if(email) {
         values.push(email);
         index++;
-        query += ` AND u.email LIKE CONCAT('%', $${index}, '%')`;
+        query += ` AND u.email LIKE '%' || $${index} || '%'`;
     }
 
     if(availability_day) {
@@ -74,12 +74,12 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     if(sector) {
         values.push(sector);
         index++;
-        query += ` AND ms.sector_name LIKE CONCAT('%', $${index}, '%')`;
+        query += ` AND ms.sector_name LIKE '%' || $${index} || '%'`;
     }
 
     values.push(limit);
     index++;
-    query += `ORDER BY id \nLIMIT $${index}`;
+    query += ` ORDER BY id LIMIT $${index}`;
 
     const result = await pool.query(query, values);
     return result.rows;

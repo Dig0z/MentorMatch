@@ -1,4 +1,4 @@
-require('dovent').config({path: '../.env'});
+require('dotenv').config({path: '../.env'});
 const jwt = require('jsonwebtoken');
 
 function auth(req, res, next) {
@@ -29,8 +29,6 @@ function auth(req, res, next) {
     //vado alla prossima funzione chiamata dal controller
     next();
 
-}
+};
 
-module.exports = {
-    auth
-}
+module.exports = auth;
