@@ -7,11 +7,31 @@ async function send_notification(user_id, message) {
 async function fetch_notifications(user_id) {
     const result = await notification_repository.fetch_notifies(user_id);
     if(!result)
-        result = 'No notifications'
+        result = 'No notification';
+    return result;
+}
+
+async function delete_notification(id, user_id) {
+    const result = await notification_repository.delete_notification(id, user_id);
+    if(!result) {
+        const err = new Error('Notification not found');
+        err.status(404);
+        throw err;
+    }
+    return result;
+}
+
+async function delete_all(user_id) {
+    const result = await notification_repository.delete_all(user_id);
+    if(!result) {
+        result = 'No notification to delete';
+    }
     return result;
 }
 
 module.exports = {
     send_notification,
-    fetch_notifications
+    fetch_notifications,
+    delete_notification,
+    delete_all
 }

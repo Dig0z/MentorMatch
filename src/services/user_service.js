@@ -88,6 +88,9 @@ async function update_photo_url(user_id, user_data) {
 async function get_mentors(filters) {
     const {name = null, surname = null, email = null, availability_day = null, sector = null, last_id = 0, limit = 20} = filters;
     const result = await user_repository.get_mentors(name, surname, email, availability_day, sector, last_id, limit);
+    if(!result) {
+        result = 'No mentor found with the selected filters';
+    }
     return result;
 };
 
