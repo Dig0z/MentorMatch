@@ -59,7 +59,7 @@ CREATE TABLE reviews (
         ON DELETE CASCADE
 );
 
-CREATE TABLE notifies (
+CREATE TABLE notifications (
     id          SERIAL PRIMARY KEY,
     user_id     INT NOT NULL,
     message     TEXT,
@@ -67,3 +67,4 @@ CREATE TABLE notifies (
     FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
 );
+
