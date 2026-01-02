@@ -5,7 +5,7 @@ async function send_notification(user_id, message) {
 }
 
 async function fetch_notifications(user_id) {
-    const result = await notification_repository.fetch_notifies(user_id);
+    const result = await notification_repository.fetch_notifications(user_id);
     if(!result)
         result = 'No notification';
     return result;
@@ -33,5 +33,6 @@ module.exports = {
     send_notification,
     fetch_notifications,
     delete_notification,
-    delete_all
+    delete_all,
+    test
 }

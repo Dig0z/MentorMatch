@@ -48,5 +48,6 @@ module.exports = {
     send_notification,
     fetch_notifications,
     delete_notification,
-    delete_all
+    delete_all,
+    test
 }
