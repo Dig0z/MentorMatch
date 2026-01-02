@@ -48,6 +48,29 @@ function validate_dto(dto) {
                     message: `${i} value must be one of the following: ${ac_val}`
                 });
             }
+
+            if(check.type) {
+                if(check.type == 'number') {
+                    if(typeof Number(value) != 'number') {
+                        errors.push({
+                            status: 400,
+                            message: `${i} must be a ${check.type}`
+                        });
+                    }
+                    if(check.min && Number(value) < check.min) {
+                        errors.push({
+                            status: 400,
+                            message: `${i} value must be greater than ${check.min}`
+                        });
+                    }
+                    if(check.max && Number(value) > check.max) {
+                        errors.push({
+                            status: 400,
+                            message: `${i} value must be smaller than ${check.min}`
+                        });
+                    }
+                }
+            }
         }
 
         if(errors.length > 0) {
