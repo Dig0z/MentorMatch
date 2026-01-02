@@ -3,6 +3,7 @@ const router = express.Router();
 const notification_service = require('../services/notification_service.js');
 const auth = require('../middleware/auth_middleware.js');
 const validate = require('../dtos/dto_middleware.js');
+const delete_notification_dto = require('../dtos/notifications/delete_notification_dto.js');
 
 router.get('/fetch_notifications', auth, async (req, res) => {
     const user_id = req.user.id;

@@ -1,6 +1,6 @@
 const delete_notification_dto = {
     id: {
-        type: number
+        type: 'number'
     }
 }
 
