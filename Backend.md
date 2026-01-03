@@ -32,6 +32,7 @@ Questa separazione aiuta a isolare la logica, rendere i componenti più testabil
 ## Moduli aggiuntivi
 
 - **Middleware / Auth**: middleware per autenticazione e verifica JWT token.
+- **Middleware / DTO**: middleware per la verifica e validazione degli input delle richieste.
 - **Error handling**: handler centrale per le eccezioni e gli errori, che normalizza le risposte d'errore verso il client.
 - **Config**: modulo per centralizzare la lettura delle variabili d'ambiente e la configurazione (porta, DB, elementi privati).
 
@@ -41,6 +42,7 @@ src/
 	controllers/
 	services/
 	repositories/
-	utils/
+	dots/
+	middleware/
 	config/
 	app.js

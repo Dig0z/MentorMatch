@@ -32,16 +32,8 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     let index = 0;
     const values = [];
     let query = `
-    SELECT *
-    FROM users u`;
-
-    if(availability_day) {
-        query += ` JOIN mentor_availability ma ON u.id = ma.mentor_id`;
-    }
-
-    if(sector) {
-        query += ` JOIN mentor_sectors ms ON u.id = ms.mentor_id`;
-    }
+        SELECT u.name, u.surname, u.bio, u.photo_url, ma.weekday, ma.start_time, ma.end_time, ms.sector_name 
+        FROM users u join mentor_availability ma on u.id = ma.mentor_id join mentor_sectors ms on u.id = ms.mentor_id    `;
     
     values.push(last_id);
     index++;
