@@ -22,9 +22,9 @@ CREATE TABLE mentor_sectors (
 CREATE TABLE mentor_availability (
     id          SERIAL PRIMARY KEY,
     mentor_id   INT NOT NULL,
-    weekday     INT NOT NULL CHECK (weekday BETWEEN 1 AND 7),
-    start_time  TIMESTAMP NOT NULL,
-    end_time    TIMESTAMP NOT NULL,
+    weekday     DATE NOT NULL,
+    start_time  TIME NOT NULL,
+    end_time    TIME NOT NULL,
     FOREIGN KEY (mentor_id) REFERENCES users(id)
         ON DELETE CASCADE,
     CHECK (start_time < end_time)
@@ -67,4 +67,5 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
 );
+
 
