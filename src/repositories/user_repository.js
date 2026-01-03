@@ -33,7 +33,7 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     const values = [];
     let query = `
         SELECT u.name, u.surname, u.bio, u.photo_url, ma.weekday, ma.start_time, ma.end_time, ms.sector_name 
-        FROM users u join mentor_availability ma on u.id = ma.mentor_id join mentor_sectors ms on u.id = ms.mentor_id
+        FROM users u left join mentor_availability ma on u.id = ma.mentor_id left join mentor_sectors ms on u.id = ms.mentor_id
         WHERE u.role = 'mentor'
     `;
     

@@ -3,7 +3,7 @@ const get_mentors_dto = {
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     },
     availability_day: {
-        accepted_values: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        type: 'date'
     },
     last_id: {
         type: 'number'
