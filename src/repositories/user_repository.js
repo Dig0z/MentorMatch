@@ -10,19 +10,19 @@ async function get_users() {
 }
 
 async function register_user(name, surname, email, password_hash, role, bio, photo_url) {
-    const query =
-    `INSERT INTO users(name, surname, email, password_hash, role, bio, photo_url)
-    VALUES($1, $2, $3, $4,$5, $6, $7)
-    RETURNING *
+    const query = `
+        INSERT INTO users(name, surname, email, password_hash, role, bio, photo_url)
+        VALUES($1, $2, $3, $4,$5, $6, $7)
+        RETURNING *
     `;
     return await pool.query(query, [name, surname, email, password_hash, role, bio, photo_url]);
 };
 
 async function get_login_data(email) {
     const query = `
-    SELECT id, password_hash
-    FROM users
-    WHERE email LIKE $1
+        SELECT id, password_hash
+        FROM users
+        WHERE email LIKE $1
     `;
     const result = await pool.query(query, [email]);
     return result.rows[0];

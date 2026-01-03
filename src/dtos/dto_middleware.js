@@ -56,11 +56,68 @@ function validate_dto(dto, source = 'body') {
             }
 
             if(check.type) {
-                if(check.type == 'number' && typeof Number(value) != 'number') {
-                    errors.push({
-                        status: 400,
-                        message: `${i} must be a ${check.type}`
-                    });
+                if(check.type == 'number') {
+                    if(typeof Number(value) != 'number') {
+                        errors.push({
+                            status: 400,
+                            message: `${i} must be a ${check.type}`
+                        });
+                    }
+                    if(check.min && Number(value) < check.min) {
+                        errors.push({
+                            status: 400,
+                            message: `${i} value must be greater than ${check.min}`
+                        });
+                    }
+                    if(check.max && Number(value) > check.max) {
+                        errors.push({
+                            status: 400,
+                            message: `${i} value must be smaller than ${check.min}`
+                        });
+                    }
+                }
+                if(check.type == 'date') {
+                    const year = Number(value.split('-')[0]);
+                    const month = Number(value.split('-')[1]);
+                    const day = Number(value.split('-')[2]);
+                    const verify_date = new Date(year, month-1, day);
+                    if(day != verify_date.getDate()) {
+                        errors.push({
+                            status: 400,
+                            message: 'Day is not valid'
+                        });
+                    }
+                    if(month != verify_date.getMonth()+1) {
+                        errors.push({
+                            status: 400,
+                            message: 'Month is not valid'
+                        });
+                    }
+                    if(check.min && check.min == 'tomorrow') {
+                        const now = new Date();
+                        if(year <= now.getFullYear() && month <= now.getMonth()+1 && day <= now.getDate()) {
+                            errors.push({
+                                status: 400,
+                                message: 'Date must start from tomorrow'
+                            });
+                        }
+                    }
+                }
+                if(check.type == 'time') {
+                    const hour = Number(value.split(':')[0]);
+                    const minute = Number(value.split(':')[1]);
+                    if(hour < 0 || hour > 23) {
+                        errors.push({
+                                status: 400,
+                                message: `${i} must be beetween 00:00 and 23:59`
+                            });
+                    }
+                    if(minute < 0 || minute > 59) {
+                        errors.push({
+                                status: 400,
+                                message: `${i} must be beetween 00:00 and 23:59`
+                            });
+                    }
                 }
             }
         }
