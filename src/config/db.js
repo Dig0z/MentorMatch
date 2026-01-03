@@ -7,7 +7,7 @@ const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    schema: process.env.DB_SCHEMA
+    options: '-c search_path=test'
 });
 
 module.exports = {pool};

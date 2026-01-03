@@ -12,6 +12,17 @@ async function add_availability(mentor_id, weekday, start_time, end_time) {
     return result.rows[0];
 };
 
+async function check_availability(mentor_id, weekday) {
+    const query = `
+        SELECT id, weekday, start_time, end_time
+        FROM mentor_availability
+        WHERE mentor_id = $1
+        AND weekday = $2
+    `;
+    const availabilities = await pool.query(query, [mentor_id, weekday]);
+    return availabilities.rows;
+}
+
 async function get_availabilities(mentor_id) {
     const query = `
         SELECT id, weekday, start_time, end_time
@@ -47,7 +58,8 @@ async function remove_all(mentor_id) {
 
 module.exports = {
     add_availability,
+    check_availability,
     get_availabilities,
     remove_availability,
-    remove_all
+    remove_all,
 }

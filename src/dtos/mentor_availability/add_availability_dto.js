@@ -1,18 +1,21 @@
 const add_availability_dto = {
-    weekday: {
+    weekday: { 
         required: true,
-        type: 'number',
-        min: 1,
-        max: 7        
+        type: 'date',
+        pattern: /^\d{4}-\d{2}-\d{2}$/, //DATE (YYYY-MM-DD)
+        min: 'tomorrow'
     },
     start_time: {
-        required: true,
-        pattern: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}(:?\d{2})?)?$/
-    },
-    end_time: {
-        required: true,
-        pattern: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}(:?\d{2})?)?$/
-    }
+    required: true,
+    type: 'time',
+    pattern: /^\d{2}:\d{2}$/ //TIME (HH:MM)
+},
+
+end_time: {
+    required: true,
+    type: 'time',
+    pattern: /^\d{2}:\d{2}$/   //TIME (HH:MM)
+}
 };
 
 module.exports = add_availability_dto;
