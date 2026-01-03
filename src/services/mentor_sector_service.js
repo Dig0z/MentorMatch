@@ -28,6 +28,7 @@ async function change_sector(mentor_id, old_name, new_name) {
 
 async function remove_sector(mentor_id, sector_name) {
     const sectors = await mentor_sector_repository.get_sectors(mentors_id);
+    //da finire
 };
 
 module.exports = {
