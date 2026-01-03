@@ -19,17 +19,20 @@ async function add_availability(mentor_id, payload) {
 
 async function get_availabilities(mentor_id) {
     const dates = await availability_repository.get_availabilities(mentor_id);
-    if(!dates) {
-        dates = 'No availability found';
+    if(!dates || dates.length == 0) {
+        const err = new Error('No date found');
+        err.status = 404;
+        throw err;
     }
     return dates;
 };
 
-async function remove_availability(id, mentor_id) {
+async function remove_availability(id_param, mentor_id) {
+    const {id} = id_param;
     const date = availability_repository.remove_availability(id, mentor_id);
     if(!date) {
         const err = new Error('Availability not found');
-        err.status(404);
+        err.status = 404;
         throw err;
     }
     return date;
@@ -37,8 +40,10 @@ async function remove_availability(id, mentor_id) {
 
 async function remove_all(mentor_id) {
     const dates = availability_repository.remove_all(mentor_id);
-    if(!dates) {
-        dates = 'No date to remove';
+    if(!dates || dates.length == 0) {
+        const err = new Error('No date found');
+        err.status = 404;
+        throw err;
     }
     return dates; 
 }

@@ -27,7 +27,7 @@ async function get_availabilities(mentor_id) {
     const query = `
         SELECT id, weekday, start_time, end_time
         FROM mentor_availability
-        WHERE id = $1
+        WHERE mentor_id = $1
     `;
     const dates = await pool.query(query, [mentor_id]);  
     return dates.rows;
