@@ -34,11 +34,12 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     let query = `
         SELECT u.name, u.surname, u.bio, u.photo_url, ma.weekday, ma.start_time, ma.end_time, ms.sector_name 
         FROM users u join mentor_availability ma on u.id = ma.mentor_id join mentor_sectors ms on u.id = ms.mentor_id
+        WHERE u.role = 'mentor'
     `;
     
     values.push(last_id);
     index++;
-    query += ` WHERE u.id > $${index}`;
+    query += ` AND u.id > $${index}`;
 
     if(name) {
         values.push(name);
@@ -72,7 +73,7 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
 
     values.push(limit);
     index++;
-    query += ` ORDER BY id LIMIT $${index}`;
+    query += ` ORDER BY u.id LIMIT $${index}`;
 
     const result = await pool.query(query, values);
     return result.rows;
