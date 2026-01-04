@@ -20,15 +20,37 @@ async function get_sectors(mentor_id) {
     return sectors;
 };
 
-async function change_sector(mentor_id, old_name, new_name) {
-    const sectors = await mentor_sector_repository.get_sectors(mentors_id);
-    const verify_update = await mentor_sector_repository.change_sector(mentor_id, old_name, new_name);
-    //da finire
+async function change_sector(mentor_id, names) {
+    const {old_name, new_name} = names;
+    const result = await mentor_sector_repository.get_sector(mentor_id, old_name);
+    if(!result) {
+        const err = new Error('Sector not found');
+        err.status = 404;
+        throw err;
+    }
+    const name = await mentor_sector_repository.change_sector(mentor_id, old_name, new_name);
+    if(!name) {
+        const err = new Error('Failed to update sector');
+        err.status = 500;
+        throw err;
+    }
+    return name;
 };
 
 async function remove_sector(mentor_id, sector_name) {
-    const sectors = await mentor_sector_repository.get_sectors(mentors_id);
-    //da finire
+    const result = await mentor_sector_repository.get_sectors(mentor_id, sector_name);
+    if(!result) {
+        const err = new Error('Sector not found');
+        err.status = 404;
+        throw err;
+    }
+    const verify = await mentor_sector_repository.remove_sector(mentor_id, sector_name);
+    if(!verify) {
+        const err = new Error('Failed to remove sector');
+        err.status = 500;
+        throw err;
+    }
+    return verify;
 };
 
 module.exports = {

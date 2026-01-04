@@ -27,7 +27,7 @@ async function change_sector(mentor_id, old_name, new_name) {
         SET sector_name = $1
         WHERE mentor_id = $2
         AND sector_name = $3 
-        RETURNING old_name, new_name
+        RETURNING sector_name
     `;
     const result = await pool.query(query, [new_name, mentor_id, old_name]);
     return result.rows[0];
@@ -45,9 +45,21 @@ async function remove_sector(mentor_id, sector_name) {
     return result.rows[0];
 };
 
+async function get_sector(mentor_id, sector_name) {
+    const query = `
+        SELECT sector_name
+        FROM mentor_sectors
+        WHERE mentor_id = $1
+        AND sector_name = $2
+    `;
+    const result = await pool.query(query, [mentor_id, sector_name]);
+    return result.rows[0];
+}
+
 module.exports = {
     add_sector,
     get_sectors,
     change_sector,
-    remove_sector
+    remove_sector,
+    get_sector
 };
