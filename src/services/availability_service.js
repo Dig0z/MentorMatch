@@ -5,7 +5,7 @@ async function add_availability(mentor_id, payload) {
     const dates = await availability_repository.check_availability(mentor_id, weekday);
     if(dates && check_date(dates, start_time)) {
         const err = new Error('Please do not overlap availabilities');
-        err.status = 400;
+        err.status = 409;
         throw err;
     }
     const result = await availability_repository.add_availability(mentor_id, weekday, start_time, end_time);

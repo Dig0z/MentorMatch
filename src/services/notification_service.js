@@ -6,8 +6,11 @@ async function send_notification(user_id, message) {
 
 async function fetch_notifications(user_id) {
     const result = await notification_repository.fetch_notifications(user_id);
-    if(!result)
-        result = 'No notification';
+    if(!result) {
+        const err = new Error('You have no notifications');
+        err.status = 404;
+        throw err;
+    }
     return result;
 }
 

@@ -23,7 +23,7 @@ async function login(login_data) {
     const identity = await user_repository.get_login_data(email);
     if(!identity) {
         const err = new Error('Email is not registered');
-        err.status = 400;
+        err.status = 404;
         throw err;
     }
     const {id, password_hash} = identity;
@@ -43,53 +43,55 @@ async function login(login_data) {
 
 async function update_name(user_id, user_data) {
     const {new_name} = user_data;
-    const result = await user_repository.update_name(user_id, new_name);
-    if(!result) {
+    const {name} = await user_repository.update_name(user_id, new_name);
+    if(!name) {
         const err = new Error('User not found');
         err.status(404);
         throw err;
     }
-    return result;
+    return name;
 };
 
 async function update_surname(user_id, user_data) {
     const {new_surname} = user_data;
-    const result = await user_repository.update_name(user_id, new_surname);
-    if(!result) {
+    const {surname} = await user_repository.update_name(user_id, new_surname);
+    if(!surname) {
         const err = new Error('User not found');
         err.status(404);
         throw err;
     }
-    return result;
+    return surname;
 };
 
 async function update_bio(user_id, user_data) {
     const {new_bio} = user_data;
-    const result = await user_repository.update_name(user_id, new_bio);
-    if(!result) {
+    const {bio} = await user_repository.update_name(user_id, new_bio);
+    if(!bio) {
         const err = new Error('User not found');
         err.status(404);
         throw err;
     }
-    return result;
+    return bio;
 };
 
 async function update_photo_url(user_id, user_data) {
     const {new_url} = user_data;
-    const result = await user_repository.update_name(user_id, new_url);
-    if(!result) {
+    const {photo_url} = await user_repository.update_name(user_id, new_url);
+    if(!photo_url) {
         const err = new Error('User not found');
         err.status(404);
         throw err;
     }
-    return result;
+    return photo_url;
 };
 
 async function get_mentors(filters) {
     const {name = null, surname = null, email = null, availability_day = null, sector = null, last_id = 0, limit = 20} = filters;
     const result = await user_repository.get_mentors(name, surname, email, availability_day, sector, last_id, limit);
-    if(!result) {
-        result = 'No mentor found with the selected filters';
+    if(!result || result.length == 0) {
+        const err = new Error('No mentors found with the selected filters');
+        err.status = 404;
+        throw err;
     }
     return result;
 };

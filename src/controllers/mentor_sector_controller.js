@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mentor_sector_service = require('../services/mentor_sector_service.js');
 const auth = require('../middleware/auth_middleware.js');
-const validate = require('../dtos/dto_middleware.js');
+const validate = require('../middleware/dto_middleware.js');
 const add_remove_sector_dto = require('../dtos/mentor_sector/add_remove_sector_dto.js');
 const change_sector_dto = require('../dtos/mentor_sector/change_sector_dto.js');
 
@@ -12,7 +12,7 @@ router.post('/add_sector', validate(add_remove_sector_dto), auth, async (req, re
     res.status(201).json({
         message: 'Sector added',
         success: true,
-        data: sector_name
+        data: {sector_name}
     });
 });
 
@@ -22,7 +22,7 @@ router.get('/get_sectors', auth, async (req, res) => {
     res.status(200).json({
         message: `Found ${sectors.length} sectors`,
         success: true,
-        data: sectors
+        data: {sectors}
     });
 });
 
@@ -32,7 +32,7 @@ router.patch('/change_sector', validate(change_sector_dto), auth, async (req, re
     res.status(200).json({
         message: `Sector name changed to ${sector_name}`,
         success: true,
-        data: sector_name
+        data: {sector_name}
     });
 });
 
@@ -42,7 +42,7 @@ router.delete('/remove_sector', validate(add_remove_sector_dto), auth, async (re
     res.status(200).json({
         message: `Sector ${sector_name} removed`,
         success: true,
-        data: sector_name
+        data: {sector_name}
     });
 });
 

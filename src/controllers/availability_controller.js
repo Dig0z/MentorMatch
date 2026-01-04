@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const availability_service = require('../services/availability_service.js');
 const auth = require('../middleware/auth_middleware.js');
-const validate = require('../dtos/dto_middleware.js');
+const validate = require('../middleware/dto_middleware.js');
 const add_availability_dto = require('../dtos/mentor_availability/add_availability_dto.js');
 const remove_availability_dto = require('../dtos/mentor_availability/remove_availability_dto.js');
 
@@ -13,7 +13,12 @@ router.post('/add_availability', validate(add_availability_dto), auth, async (re
     return res.status(201).json({
         message: 'Availability added',
         success: true,
-        data: {id, weekday, start_time, end_time}
+        data: {
+            id, 
+            weekday, 
+            start_time, 
+            end_time
+        }
     });
 });
 
@@ -34,7 +39,12 @@ router.delete('/remove_availability/:id', validate(remove_availability_dto, 'par
     res.status(200).json({
         message: 'Date removed',
         success: true,
-        data: {id, weekday, start_time, end_time}
+        data: {
+            id, 
+            weekday, 
+            start_time, 
+            end_time
+        }
     });
 });
 
