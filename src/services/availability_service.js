@@ -48,6 +48,16 @@ async function remove_all(mentor_id) {
     return dates; 
 }
 
+async function get_availability(weekday, start_time, end_time) {
+    const availability = await availability_repository.get_availability(weekday, start_time, end_time);
+    if(!availability) {
+        const err = new Error('Selected time is not available');
+        err.status = 404;
+        throw err;
+    }
+    return availability;
+}
+
 function check_date(dates, new_start_time) {
     for(i in dates) {
         const {end_time} = dates[i];
@@ -66,5 +76,6 @@ module.exports = {
     add_availability,
     get_availabilities,
     remove_availability,
-    remove_all
+    remove_all,
+    get_availability
 };

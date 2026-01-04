@@ -12,6 +12,7 @@ npm install pg
 npm install dotenv
 npm install jsonwebtoken
 npm install bcrypt
+npm install googleapis
 
 ## Installazione (rapida)
 

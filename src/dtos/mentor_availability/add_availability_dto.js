@@ -6,16 +6,15 @@ const add_availability_dto = {
         min: 'tomorrow'
     },
     start_time: {
-    required: true,
-    type: 'time',
-    pattern: /^\d{2}:\d{2}$/ //TIME (HH:MM)
-},
-
-end_time: {
-    required: true,
-    type: 'time',
-    pattern: /^\d{2}:\d{2}$/   //TIME (HH:MM)
-}
+        required: true,
+        type: 'time',
+        pattern: /^\d{2}:\d{2}$/ //TIME (HH:MM)
+    },
+    end_time: {
+        required: true,
+        type: 'time',
+        pattern: /^\d{2}:\d{2}$/   //TIME (HH:MM)
+    }
 };
 
 module.exports = add_availability_dto;

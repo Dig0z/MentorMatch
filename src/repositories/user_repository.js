@@ -124,6 +124,16 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     return result.rows;
 }
 
+async function get_id_from_email(email) {
+    const query = `
+        SELECT id
+        FROM users
+        WHERE email = $1
+    `;
+    const result = await pool.query(query, [email]);
+    return result.rows[0];
+}
+
 module.exports = {
     get_users,
     register_user,
@@ -132,5 +142,6 @@ module.exports = {
     update_surname,
     update_bio,
     update_photo_url,
-    get_mentors
+    get_mentors,
+    get_id_from_email
 };

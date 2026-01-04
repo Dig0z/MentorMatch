@@ -56,10 +56,23 @@ async function remove_all(mentor_id) {
     return dates.rows;
 }
 
+async function get_availability(weekday, start_time, end_time) {
+    const query = `
+        SELECT id
+        FROM mentor_availability
+        WHERE weekday = $1
+        AND start_time = $2
+        AND end_time = $3 
+    `;
+    const availability = await pool.query(query, [weekday, start_time, end_time]); 
+    return availability.rows[0];
+}
+
 module.exports = {
     add_availability,
     check_availability,
     get_availabilities,
     remove_availability,
     remove_all,
+    get_availability
 }

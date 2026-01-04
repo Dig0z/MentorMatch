@@ -96,6 +96,16 @@ async function get_mentors(filters) {
     return result;
 };
 
+async function get_id_from_email(email) {
+    const {id} = await user_repository.get_id_from_email(email);
+    if(!id) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+    }
+    return id;
+};
+
 module.exports = {
     register,
     login,
@@ -103,5 +113,6 @@ module.exports = {
     update_name,
     update_surname,
     update_bio,
-    update_photo_url
+    update_photo_url,
+    get_id_from_email
 };
