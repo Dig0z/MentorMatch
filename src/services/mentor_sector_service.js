@@ -1,6 +1,7 @@
 const mentor_sector_repository = require('../repositories/mentor_sector_repository.js');
 
-async function add_sector(mentor_id, sector_name) {
+async function add_sector(mentor_id, new_name) {
+    const {sector_name} = new_name;
     const name = await mentor_sector_repository.add_sector(mentor_id, sector_name);
     if(!name || name.length == 0) {
         const err = new Error('Failed to add sector');
@@ -37,8 +38,9 @@ async function change_sector(mentor_id, names) {
     return name;
 };
 
-async function remove_sector(mentor_id, sector_name) {
-    const result = await mentor_sector_repository.get_sectors(mentor_id, sector_name);
+async function remove_sector(mentor_id, old_name) {
+    const {sector_name} = old_name
+    const result = await mentor_sector_repository.get_sector(mentor_id, sector_name);
     if(!result) {
         const err = new Error('Sector not found');
         err.status = 404;

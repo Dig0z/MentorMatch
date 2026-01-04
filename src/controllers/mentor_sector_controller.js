@@ -8,11 +8,11 @@ const change_sector_dto = require('../dtos/mentor_sector/change_sector_dto.js');
 
 router.post('/add_sector', validate(add_remove_sector_dto), auth, async (req, res) => {
     const mentor_id = req.user.id;
-    const name = await mentor_sector_service.add_sector(mentor_id, req.body);
+    const {sector_name} = await mentor_sector_service.add_sector(mentor_id, req.body);
     res.status(201).json({
         message: 'Sector added',
         success: true,
-        data: name
+        data: sector_name
     });
 });
 
@@ -28,21 +28,21 @@ router.get('/get_sectors', auth, async (req, res) => {
 
 router.patch('/change_sector', validate(change_sector_dto), auth, async (req, res) => {
     const mentor_id = req.user.id;
-    const name = await mentor_sector_service.change_sector(mentor_id, req.body);
+    const {sector_name} = await mentor_sector_service.change_sector(mentor_id, req.body);
     res.status(200).json({
-        message: `Sector name change to ${name}`,
+        message: `Sector name changed to ${sector_name}`,
         success: true,
-        data: name
+        data: sector_name
     });
 });
 
 router.delete('/remove_sector', validate(add_remove_sector_dto), auth, async (req, res) => {
     const mentor_id = req.user.id;
-    const name = await mentor_sector_service.remove_sector(mentor_id, req.body);
+    const {sector_name} = await mentor_sector_service.remove_sector(mentor_id, req.body);
     res.status(200).json({
-        message: `Sector ${name} removed`,
+        message: `Sector ${sector_name} removed`,
         success: true,
-        data: name
+        data: sector_name
     });
 });
 
