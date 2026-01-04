@@ -1,6 +1,6 @@
 const path = require('path');
 require('dotenv').config({path: path.resolve(__dirname, '..', '.env')});
-const exception_handler = require('./middleware/exception_handler.js');
+const exception_handler = require('./middlewares/exception_handler.js');
 const express = require('express');
 const app = express();
 

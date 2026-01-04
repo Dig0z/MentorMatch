@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const availability_service = require('../services/availability_service.js');
-const auth = require('../middleware/auth_middleware.js');
-const validate = require('../middleware/dto_middleware.js');
+const auth = require('../middlewares/auth_middleware.js');
+const validate = require('../middlewares/dto_middleware.js');
 const add_availability_dto = require('../dtos/mentor_availability/add_availability_dto.js');
 const remove_availability_dto = require('../dtos/mentor_availability/remove_availability_dto.js');
 
