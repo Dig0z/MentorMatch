@@ -12,20 +12,33 @@ async function book_session(mentor_id, mentee_id, start_datetime, end_datetime, 
     return result.rows[0];
 };
 
-async function update_status(id, mentor_id, mentee_id, status) {
+async function update_status(id, user_id, status) {
     const query = `
         UPDATE sessions
         SET status = $1
         WHERE id = $2
-        AND mentor_id = $3
-        AND mentee_id = $4
+        AND (mentor_id = $3 OR mentee_id = $3)
         RETURNING id, start_datetime, end_datetime, status, meeting_link
     `;
-    const result = await pool.query(query, [status, id, mentor_id, mentee_id]);
+    const result = await pool.query(query, [status, id, user_id]);
     return result.rows[0];
 };
 
+async function add_meeting_link(id, user_id, meeting_link) {
+    const query = `
+        UPDATE sessions
+        SET meeting_link = $1
+        WHERE id = $2
+        AND (mentor_id = $3 OR mentee_id = $3)
+        RETURNING id, start_datetime, end_datetime, status, meeting_link
+    `;
+    const values = [meeting_link, id, user_id];
+    const session = await pool.query(query, values);
+    return session.rows[0];
+}
+
 module.exports = {
     book_session,
-    update_status
+    update_status,
+    add_meeting_link
 };
