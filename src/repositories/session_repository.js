@@ -37,8 +37,44 @@ async function add_meeting_link(id, user_id, meeting_link) {
     return session.rows[0];
 }
 
+async function delete_session(id, user_id) {
+    const query = `
+        DELETE
+        FROM sessions
+        WHERE id = $1
+        AND (mentor_id = $2 OR mentee_id = $2)
+        RETURNING start_datetime, end_datetime, status
+    `;
+    const result = await pool.query(query, [id, user_id]);
+    return result.rows[0];
+}
+
+async function get_session(id, user_id) {
+    const query = `
+        SELECT id, start_datetime, end_datetime, status, meeting_link
+        FROM sessions
+        WHERE id = $1
+        AND (mentor_id = $2 OR mentee_id = $2)
+    `;
+    const result = await pool.query(query, [id, user_id]);
+    return result.rows[0];
+}
+
+async function get_user_sessions(user_id) {
+    const query = `
+        SELECT id, start_datetime, end_datetime, status, meeting_link
+        FROM sessions
+        WHERE (mentor_id = $2 OR mentee_id = $2)
+    `;
+    const result = await pool.query(query, [id, user_id]);
+    return result.rows;
+}
+
 module.exports = {
     book_session,
     update_status,
-    add_meeting_link
+    add_meeting_link,
+    delete_session,
+    get_session,
+    get_user_sessions
 };

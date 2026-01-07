@@ -52,8 +52,27 @@ async function cancel_session(user_id, session_id) {
     return session;
 }
 
+async function confirm_cancellation(user_id, session_id) {
+    const {id} = session_id;
+    const session = await session_repository.get_session(id, user_id);
+    if(!session) {
+        const err = new Error('Session not found');
+        err.status = 404;
+        throw err;
+    }
+    const {status:check_status} = session;
+    if(check_status != 'cancelled') {
+        const err = new Error('Cannot confirm cancellation. Notify other user first,');
+        err.status = 409;
+        throw err;
+    }
+    const deleted_session = await session_repository.delete_session(id, user_id);
+    return deleted_session;
+}
+
 module.exports = {
     book_session,
     confirm_booking,
-    cancel_session
+    cancel_session,
+    confirm_cancellation
 };
