@@ -64,9 +64,10 @@ async function get_user_sessions(user_id) {
     const query = `
         SELECT id, start_datetime, end_datetime, status, meeting_link
         FROM sessions
-        WHERE (mentor_id = $2 OR mentee_id = $2)
+        WHERE (mentor_id = $1 OR mentee_id = $1)
     `;
-    const result = await pool.query(query, [id, user_id]);
+    const result = await pool.query(query, [user_id]);
+    console.log(result.rows);
     return result.rows;
 }
 

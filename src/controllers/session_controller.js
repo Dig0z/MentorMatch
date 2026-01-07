@@ -28,7 +28,7 @@ router.get('/confirm_booking/:id', validate(session_only_id_dto, 'params'), auth
     const result = await session_service.confirm_booking(mentor_id, req.params);
     const {id, start_datetime, end_datetime, status, meeting_link} = result;
     res.status(200).json({
-        message: `Sessiom confirmed on ${start_datetime}. Meeting link: ${meeting_link}`,
+        message: `Session confirmed on ${start_datetime}. Meeting link: ${meeting_link}`,
         success: true,
         data: {
             id,
@@ -69,6 +69,17 @@ router.delete('/confirm_cancellation/:id', validate(session_only_id_dto, 'params
             status
         }
     });
+});
+
+router.get('/get_sessions', auth, async (req, res) => {
+    const user_id = req.user.id;
+    console.log(user_id);
+    const sessions = await session_service.get_user_sessions(user_id);
+    res.status(200).json({
+        message: `${sessions.length} booked sessions found`,
+        success: true,
+        data: sessions
+    }); 
 });
 
 module.exports = router;

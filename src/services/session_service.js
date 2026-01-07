@@ -10,8 +10,8 @@ async function book_session(mentee_id, session_data) {
     const status = 'pending';
     const start_datetime = `${date} ${start_time}`;
     const end_datetime = `${date} ${end_time}`;
-    const result = await session_repository.book_session(mentor_id, mentee_id, start_datetime, end_datetime, status);
-    if(!result) {
+    const session = await session_repository.book_session(mentor_id, mentee_id, start_datetime, end_datetime, status);
+    if(!session) {
         const err = new Error('Failed to book session');
         err.status = 500;
         throw err;
@@ -21,8 +21,20 @@ async function book_session(mentee_id, session_data) {
 
 async function confirm_booking(mentor_id, session_id) {
     const {id} = session_id;
-    const meet_link = await google_service.createMeetLink();
-    const {check_status} = await session_repository.update_status(id, mentor_id, 'confirmed');
+    const check_session = await session_repository.get_session(id, mentor_id);
+    if(!check_session) {
+        const err = new Error('Session not found');
+        err.status = 404;
+        throw err;
+    }
+    const {start_datetime:start, end_datetime:end} = check_session;
+    const start_date = new Date(start);
+    const end_date = new Date(end);
+    const iso_start = start_date.toISOString();
+    const iso_end = end_date.toISOString();
+    const meet_link = await google_service.createMeetLink(iso_start, iso_end);
+    const {status:check_status} = await session_repository.update_status(id, mentor_id, 'confirmed');
+    console.log(check_status);
     if(!check_status || check_status != 'confirmed') {
         const err = new Error('Failed to update booking status');
         err.status = 500;
@@ -70,9 +82,21 @@ async function confirm_cancellation(user_id, session_id) {
     return deleted_session;
 }
 
+async function get_user_sessions(user_id) {
+    const {id} = user_id;
+    const sessions = await session_repository.get_user_sessions(id);
+    if(!sessions || sessions.length == 0) {
+        const err = new Error('No sessions found');
+        err.status = 404;
+        throw err;
+    }
+    return sessions;
+}
+
 module.exports = {
     book_session,
     confirm_booking,
     cancel_session,
-    confirm_cancellation
+    confirm_cancellation,
+    get_user_sessions
 };
