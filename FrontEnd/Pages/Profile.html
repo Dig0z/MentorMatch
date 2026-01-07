@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo - MentorMatch</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../CSS/Style.css">
+
+    <style>
+        /* Foto grande */
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 15px;
+            background-color: #e5e5e5;
+            border: 2px solid #ddd;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .profile-box {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 0 18px rgba(0,0,0,0.07);
+        }
+
+        .sector-box {
+            background: #f7f7f7;
+            border: 1px solid #e4e4e4;
+            border-radius: 10px;
+            padding: 12px 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <div id="navbar"></div>
+
+    <div class="container py-5">
+        <h2 class="fw-bold mb-4">Profilo</h2>
+
+        <div class="row g-5">
+
+            <!-- FOTO -->
+            <div class="col-lg-3 col-md-4 text-center">
+                <img id="profileImage" src="../Img/default-user.png" class="profile-photo mb-3">
+
+                <input type="file" id="photoInput" class="form-control mb-2">
+                <button class="btn btn-primary w-100" onclick="uploadPhoto()">Aggiorna Foto</button>
+            </div>
+
+            <!-- DATI PERSONALI -->
+            <div class="col-lg-9 col-md-8">
+                <div class="profile-box">
+
+                    <h4 class="fw-bold mb-3">Dati Personali</h4>
+
+                    <div class="row g-3 mb-3">
+
+                        <!-- NOME (no editable) -->
+                        <div class="col-md-6">
+                            <label class="form-label">Nome</label>
+                            <div class="form-control bg-light">{{NOME}}</div>
+                        </div>
+
+                        <!-- COGNOME (no editable) -->
+                        <div class="col-md-6">
+                            <label class="form-label">Cognome</label>
+                            <div class="form-control bg-light">{{COGNOME}}</div>
+                        </div>
+
+                        <!-- EMAIL (no editable) -->
+                        <div class="col-md-12">
+                            <label class="form-label">Email</label>
+                            <div class="form-control bg-light">{{EMAIL}}</div>
+                        </div>
+
+                        <!-- SECTOR (CHECKBOXES) -->
+                        <div class="col-md-12">
+                            <label class="form-label">Settori di competenza</label>
+
+                            <div class="sector-box">
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Programmazione" id="sector1">
+                                    <label class="form-check-label" for="sector1">Programmazione</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Design" id="sector2">
+                                    <label class="form-check-label" for="sector2">Design</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Marketing" id="sector3">
+                                    <label class="form-check-label" for="sector3">Marketing</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Business" id="sector4">
+                                    <label class="form-check-label" for="sector4">Business</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Data Science" id="sector5">
+                                    <label class="form-check-label" for="sector5">Data Science</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="AI / Machine Learning" id="sector6">
+                                    <label class="form-check-label" for="sector6">AI / Machine Learning</label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- BIO -->
+                        <div class="col-md-12">
+                            <label class="form-label">Biografia</label>
+                            <textarea id="bio" class="form-control" rows="4" placeholder="Scrivi una breve descrizione..."></textarea>
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-primary w-100" onclick="saveProfile()">Salva Modifiche</button>
+
+                </div>
+
+                <!-- RECENSIONI Y CALENDARIO -->
+                <div class="row g-4 mt-4">
+
+                    <div class="col-lg-6">
+                        <div class="profile-box">
+                            <h5 class="fw-bold mb-2">Recensioni</h5>
+                            <p class="small text-muted">Ultima recensione:</p>
+                            <p class="mb-2">"Molto professionale e disponibile!"</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="profile-box">
+                            <h5 class="fw-bold mb-2">Calendario</h5>
+                            <p class="small text-muted">Prossima sessione:</p>
+                            <p class="mb-2">Domani, ore 15:00</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NAVBAR LOADER -->
+    <script>
+        fetch("../Components/navBar.html")
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("navbar").innerHTML = html;
+
+                document.getElementById("logoutBtn")?.addEventListener("click", () => {
+                    localStorage.clear();
+                    window.location.href = "Log.html";
+                });
+            });
+    </script>
+
+    <!-- SCRIPT PERFIL -->
+    <script>
+        function uploadPhoto() {
+            alert("Sistema di caricamento foto da collegare al backend.");
+        }
+
+        function saveProfile() {
+            const selected = [];
+
+            document.querySelectorAll(".form-check-input:checked").forEach(chk => {
+                selected.push(chk.value);
+            });
+
+            const bio = document.getElementById("bio").value;
+
+            console.log("Settori selezionati:", selected);
+            console.log("Biografia:", bio);
+
+            alert("Profilo aggiornato! (backend da collegare)");
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogo Mentori - MentorMatch</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../CSS/Style.css">
+
+    <style>
+        .mentor-card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.08);
+            transition: 0.2s;
+        }
+
+        .mentor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+        }
+
+        .mentor-photo {
+            width: 90px;
+            height: 90px;
+            border-radius: 10px;
+            object-fit: cover;
+            background-color: #e3e3e3;
+        }
+
+        .mentor-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            font-size: 22px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .mentor-btn:hover {
+            background-color: #3a7ac5;
+        }
+
+        /* responsive fix */
+        @media (max-width: 576px) {
+            .mentor-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .mentor-btn {
+                width: 100%;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <div id="navbar"></div>
+
+    <div class="container py-5">
+
+        <h2 class="fw-bold mb-4">Catalogo Mentori</h2>
+
+        <!-- FILTRI -->
+        <div class="card p-4 shadow-sm mb-4">
+            <h5 class="fw-bold mb-3">Filtri</h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Settore</label>
+                    <select class="form-select">
+                        <option>Tutti</option>
+                        <option>Programmazione</option>
+                        <option>Design</option>
+                        <option>Marketing</option>
+                        <option>Business</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Lingua</label>
+                    <select class="form-select">
+                        <option>Tutte</option>
+                        <option>Italiano</option>
+                        <option>Inglese</option>
+                        <option>Spagnolo</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Disponibilità</label>
+                    <select class="form-select">
+                        <option>Tutti</option>
+                        <option>Oggi</option>
+                        <option>Questa settimana</option>
+                        <option>Questo mese</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Valutazione Minima</label>
+                    <select class="form-select">
+                        <option value="">Tutte le valutazioni</option>
+                        <option value="5">⭐⭐⭐⭐⭐ 5 stelle</option>
+                        <option value="4">⭐⭐⭐⭐ 4+ stelle</option>
+                        <option value="3">⭐⭐⭐ 3+ stelle</option>
+                        <option value="2">⭐⭐ 2+ stelle</option>
+                        <option value="1">⭐ 1+ stella</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- LISTA MENTORI temporale -->
+        <div class="row g-3">
+
+            <!-- MENTOR 1 -->
+            <div class="col-12 mentor-item" data-rating="5">
+                <div class="mentor-card">
+                    <img src="../Img/default-user.png" class="mentor-photo">
+
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1">Giovanni Rossi <span class="badge bg-warning text-dark">⭐⭐⭐⭐⭐ 5.0</span></h5>
+                        <p class="mb-1 small text-muted">Sviluppatore Full Stack · 10 anni di esperienza</p>
+                        <p class="small mb-0">Lingue: Italiano, Inglese</p>
+                    </div>
+
+                    <button class="mentor-btn">+</button>
+                </div>
+            </div>
+
+            <!-- MENTOR 2 -->
+            <div class="col-12 mentor-item" data-rating="4">
+                <div class="mentor-card">
+                    <img src="../Img/default-user.png" class="mentor-photo">
+
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1">Elena Bianchi <span class="badge bg-warning text-dark">⭐⭐⭐⭐ 4.5</span></h5>
+                        <p class="mb-1 small text-muted">UX/UI Designer · Ex Google</p>
+                        <p class="small mb-0">Lingue: Italiano, Spagnolo</p>
+                    </div>
+
+                    <button class="mentor-btn">+</button>
+                </div>
+            </div>
+
+            <!-- MENTOR 3 -->
+            <div class="col-12 mentor-item" data-rating="3">
+                <div class="mentor-card">
+                    <img src="../Img/default-user.png" class="mentor-photo">
+
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1">Carlos Martínez <span class="badge bg-warning text-dark">⭐⭐⭐ 3.5</span></h5>
+                        <p class="mb-1 small text-muted">Data Analyst · Specializzato in AI</p>
+                        <p class="small mb-0">Lingue: Inglese, Spagnolo</p>
+                    </div>
+
+                    <button class="mentor-btn">+</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NAVBAR LOADER -->
+    <script>
+        fetch("../Components/navBar.html")
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById("navbar").innerHTML = html;
+
+                document.getElementById("logoutBtn")?.addEventListener("click", () => {
+                    localStorage.clear();
+                    window.location.href = "Log.html";
+                });
+            });
+    </script>
+
+    <!-- FILTRO DE ESTRELLAS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const mentorItems = document.querySelectorAll('.mentor-item');
+            const selects = document.querySelectorAll('.form-select');
+            const ratingFilterSelect = selects[3]; // El cuarto select es el de valutación
+
+            if (ratingFilterSelect) {
+                ratingFilterSelect.addEventListener('change', function() {
+                    const selectedRating = this.value;
+                    
+                    mentorItems.forEach(mentor => {
+                        const mentorRating = parseInt(mentor.getAttribute('data-rating'));
+                        
+                        if (selectedRating === '' || mentorRating >= parseInt(selectedRating)) {
+                            mentor.style.display = 'block';
+                        } else {
+                            mentor.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

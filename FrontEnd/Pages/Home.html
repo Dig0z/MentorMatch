@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - MentorMatch</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Light Theme CSS -->
+    <link rel="stylesheet" href="../CSS/Style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR DINÁMICA -->
+    <div id="navbar"></div>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section-light text-center py-5">
+        <h1 class="display-4 fw-bold">Trova il Mentor Perfetto per Te</h1>
+        <p class="lead mb-4">
+            Piattaforma professionale per collegare studenti e professionisti in sessioni 1:1.
+        </p>
+
+        <a href="CatalogoMentors.html" class="btn btn-primary btn-lg px-4">
+            Inizia Ora
+        </a>
+    </section>
+
+    <!-- VALUES SECTION -->
+    <section class="values-section-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Perché Scegliere MentorMatch?</h2>
+
+            <div class="row text-center g-4">
+
+                <div class="col-md-4">
+                    <div class="value-box-light p-4 rounded shadow-sm">
+                        <h4 class="fw-bold">Mentor Certificati</h4>
+                        <p class="mt-2">Professionisti reali con esperienza verificata.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="value-box-light p-4 rounded shadow-sm">
+                        <h4 class="fw-bold">Prenotazioni Veloci</h4>
+                        <p class="mt-2">Calendario semplificato e notifiche automatiche.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="value-box-light p-4 rounded shadow-sm">
+                        <h4 class="fw-bold">Videochiamate Integrate</h4>
+                        <p class="mt-2">Sessioni con Zoom o Google Meet in un clic.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- NAVBAR LOADER -->
+    <script>
+        fetch("../Components/navBar.html")
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("navbar").innerHTML = html;
+
+                // Logout
+                document.getElementById("logoutBtn")?.addEventListener("click", () => {
+                    localStorage.clear();
+                    window.location.href = "Log.html";
+                });
+            });
+    </script>
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

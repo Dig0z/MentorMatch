@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentee Dashboard - MentorMatch</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../CSS/Style.css">
+
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+    <style>
+        /* Caja del calendario */
+        #calendar {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+
+        /* Caja de notificaciones */
+        .notif-box {
+            border-radius: 10px;
+            padding: 15px;
+            background: #f7f7f7;
+            border: 1px solid #e4e4e4;
+        }
+
+        /* ===== RESPONSIVE FIX PARA FULLCALENDAR ===== */
+        @media (max-width: 576px) {
+
+            #calendar {
+                padding: 10px !important;
+            }
+
+            /* Toolbar vertical */
+            .fc-toolbar.fc-header-toolbar {
+                flex-direction: column !important;
+                gap: 6px;
+                text-align: center;
+            }
+
+            .fc-toolbar-chunk {
+                display: flex;
+                justify-content: center;
+            }
+
+            /* Reduce tamaño del calendario */
+            .fc {
+                font-size: 0.75rem;
+            }
+
+            .fc-daygrid-day {
+                padding: 2px !important;
+            }
+
+            .fc-scroller {
+                overflow: hidden !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR DINÁMICA -->
+    <div id="navbar"></div>
+
+    <div class="container py-5">
+
+        <h2 class="fw-bold mb-4">Dashboard Mentee</h2>
+
+        <!-- CALENDARIO -->
+        <div class="card p-4 shadow-sm mb-5">
+            <h4 class="fw-bold mb-3">Il Tuo Calendario</h4>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- NOTIFICHE -->
+        <div class="card p-4 shadow-sm">
+            <h4 class="fw-bold mb-4">Notifiche</h4>
+
+            <div class="notif-box mb-3">
+                <p class="fw-semibold mb-1">Prossimo appuntamento tra 24 ore.</p>
+                <p class="small text-muted">Ricorda di preparare le domande per il tuo mentor.</p>
+            </div>
+
+            <div class="notif-box mb-3">
+                <p class="fw-semibold mb-1">Nuovo feedback disponibile.</p>
+                <p class="small text-muted">Controlla il feedback della tua ultima sessione.</p>
+            </div>
+
+            <div class="notif-box">
+                <p class="fw-semibold mb-1">Aggiorna la tua biografia.</p>
+                <p class="small text-muted">Il tuo profilo ha ricevuto 5 visualizzazioni questa settimana.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NAVBAR LOADER -->
+    <script>
+        fetch("../Components/navBar.html")
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("navbar").innerHTML = html;
+
+                // Logout funcional
+                document.getElementById("logoutBtn")?.addEventListener("click", () => {
+                    localStorage.clear();
+                    window.location.href = "Log.html";
+                });
+            });
+    </script>
+
+    <!-- FULLCALENDAR SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            const isMobile = window.innerWidth < 576;
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: isMobile ? 'dayGridWeek' : 'dayGridMonth',
+                height: isMobile ? 400 : 650,
+
+                headerToolbar: isMobile
+                    ? {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: ''
+                    }
+                    : {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+
+                events: [
+                    {
+                        title: 'Sessione con Giovanni',
+                        start: '2025-02-12T14:00',
+                        color: '#4a90e2'
+                    },
+                    {
+                        title: 'Sessione con Elena',
+                        start: '2025-02-14T10:00',
+                        color: '#16a085'
+                    },
+                    {
+                        title: 'Sessione passata: Sara',
+                        start: '2025-02-05T15:00',
+                        color: '#999999',
+                        textColor: 'white'
+                    }
+                ]
+            });
+
+            calendar.render();
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
