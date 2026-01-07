@@ -68,4 +68,12 @@ CREATE TABLE notifications (
         ON DELETE CASCADE
 );
 
-
+CREATE TABLE google_meet_token(
+	id SERIAL PRIMARY KEY,
+	access_token TEXT,
+	refresh_token TEXT,
+	scope TEXT,
+	expiry_date TEXT,
+	singleton BOOLEAN GENERATED ALWAYS AS (TRUE) STORED,
+    CONSTRAINT only_one_row UNIQUE (singleton)
+);
