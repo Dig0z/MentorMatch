@@ -55,7 +55,7 @@ function validate_dto(dto, source = 'body') {
                 });
             }
 
-            if(check.type) {
+            if(check.type && !check.required && value) {
                 if(check.type == 'number') {
                     if(typeof Number(value) != 'number') {
                         errors.push({

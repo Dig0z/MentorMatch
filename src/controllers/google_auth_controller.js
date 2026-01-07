@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const google = require('../google');
+const google_auth_service = require('../services/google_auth_service.js');
 
-router.get("/google/auth", (req, res) => {
-    const url = google.getAuthUrl();
+router.get('/auth', (req, res) => {
+    const url = google_auth_service.getAuthUrl();
+    console.log();
     res.status(200).json({
         message: 'Authentication URL retrieved',
         success: true,
@@ -13,8 +14,8 @@ router.get("/google/auth", (req, res) => {
     });
 });
 
-router.get("/google/callback", async (req, res) => {
-    await google.setAuthCode(req.query.code);
+router.get('/callback', async (req, res) => {
+    await google_auth_service.setAuthCode(req.query.code);
     res.status(200).json({
         message: 'Authorization completed. Generating meet link...',
         success: true

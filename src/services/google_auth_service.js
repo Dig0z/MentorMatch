@@ -1,6 +1,5 @@
 const {google} = require('googleapis');
 const google_auth_repository = require('../repositories/google_auth_repository.js');
-const { ideahub } = require('googleapis/build/src/apis/ideahub/index.js');
 
 const saltRounds = 10;
 
@@ -50,9 +49,8 @@ async function setAuthCode(code) {
 async function loadSavedTokens() {
     const tokens = await google_auth_repository.get_tokens();
     if(!tokens) {
-        const err = new Error('Tokens not found');
-        err.status = 404;
-        throw err;
+        console.error('Token not found. Google Meet Links cannot be generated ad the moment');
+        return;
     }
     const {access_token:cypher_access_token, refresh_token:cypher_refresh_token, scope, token_type, expiry_date} = tokens;
     const access_token = decypher(cypher_access_token);
