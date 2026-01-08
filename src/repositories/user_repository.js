@@ -134,6 +134,16 @@ async function get_id_from_email(email) {
     return result.rows[0];
 }
 
+async function get_role(user_id) {
+    const query = `
+        SELECT role
+        FROM users
+        WHERE id = $1
+    `;
+    const role = await pool.query(query, [user_id]);
+    return role.rows[0];
+}
+
 module.exports = {
     get_users,
     register_user,
@@ -143,5 +153,6 @@ module.exports = {
     update_bio,
     update_photo_url,
     get_mentors,
-    get_id_from_email
+    get_id_from_email,
+    get_role
 };

@@ -13,6 +13,7 @@ npm install dotenv
 npm install jsonwebtoken
 npm install bcrypt
 npm install googleapis
+npm install cors
 
 ## Installazione (rapida)
 

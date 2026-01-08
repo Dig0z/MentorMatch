@@ -16,7 +16,7 @@ async function register(user_data) {
         {expiresIn: '1h'}
     );
     return {user, token};
-};
+}
 
 async function login(login_data) {
     const {email, password} = login_data;
@@ -39,7 +39,7 @@ async function login(login_data) {
         {expiresIn: '1h'}
     );
     return {valid, token};
-};
+}
 
 async function update_name(user_id, user_data) {
     const {new_name} = user_data;
@@ -50,7 +50,7 @@ async function update_name(user_id, user_data) {
         throw err;
     }
     return name;
-};
+}
 
 async function update_surname(user_id, user_data) {
     const {new_surname} = user_data;
@@ -61,7 +61,7 @@ async function update_surname(user_id, user_data) {
         throw err;
     }
     return surname;
-};
+}
 
 async function update_bio(user_id, user_data) {
     const {new_bio} = user_data;
@@ -72,7 +72,7 @@ async function update_bio(user_id, user_data) {
         throw err;
     }
     return bio;
-};
+}
 
 async function update_photo_url(user_id, user_data) {
     const {new_url} = user_data;
@@ -83,7 +83,7 @@ async function update_photo_url(user_id, user_data) {
         throw err;
     }
     return photo_url;
-};
+}
 
 async function get_mentors(filters) {
     const {name = null, surname = null, email = null, availability_day = null, sector = null, last_id = 0, limit = 20} = filters;
@@ -94,7 +94,7 @@ async function get_mentors(filters) {
         throw err;
     }
     return result;
-};
+}
 
 async function get_id_from_email(email) {
     const {id} = await user_repository.get_id_from_email(email);
@@ -104,7 +104,17 @@ async function get_id_from_email(email) {
         throw err;
     }
     return id;
-};
+}
+
+async function get_role(user_id) {
+    const {role} = await user_repository.get_role(user_id);
+    if(!role) {
+        const err = new Error('Failed to retrieve role');
+        err.status = 500;
+        throw err;
+    }
+    return role;
+}
 
 module.exports = {
     register,
@@ -114,5 +124,6 @@ module.exports = {
     update_surname,
     update_bio,
     update_photo_url,
-    get_id_from_email
+    get_id_from_email,
+    get_role
 };
