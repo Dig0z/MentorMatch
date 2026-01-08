@@ -83,8 +83,8 @@ async function confirm_cancellation(user_id, session_id) {
 }
 
 async function get_user_sessions(user_id) {
-    const {id} = user_id;
-    const sessions = await session_repository.get_user_sessions(id);
+    user_id;
+    const sessions = await session_repository.get_user_sessions(user_id);
     if(!sessions || sessions.length == 0) {
         const err = new Error('No sessions found');
         err.status = 404;
