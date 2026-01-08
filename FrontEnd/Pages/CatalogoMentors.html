@@ -128,55 +128,8 @@
             </div>
         </div>
 
-        <!-- LISTA MENTORI temporale -->
-        <div class="row g-3">
-
-            <!-- MENTOR 1 -->
-            <div class="col-12 mentor-item" data-rating="5">
-                <div class="mentor-card">
-                    <img src="../Img/default-user.png" class="mentor-photo">
-
-                    <div class="flex-grow-1">
-                        <h5 class="fw-bold mb-1">Giovanni Rossi <span class="badge bg-warning text-dark">⭐⭐⭐⭐⭐ 5.0</span></h5>
-                        <p class="mb-1 small text-muted">Sviluppatore Full Stack · 10 anni di esperienza</p>
-                        <p class="small mb-0">Lingue: Italiano, Inglese</p>
-                    </div>
-
-                    <button class="mentor-btn">+</button>
-                </div>
-            </div>
-
-            <!-- MENTOR 2 -->
-            <div class="col-12 mentor-item" data-rating="4">
-                <div class="mentor-card">
-                    <img src="../Img/default-user.png" class="mentor-photo">
-
-                    <div class="flex-grow-1">
-                        <h5 class="fw-bold mb-1">Elena Bianchi <span class="badge bg-warning text-dark">⭐⭐⭐⭐ 4.5</span></h5>
-                        <p class="mb-1 small text-muted">UX/UI Designer · Ex Google</p>
-                        <p class="small mb-0">Lingue: Italiano, Spagnolo</p>
-                    </div>
-
-                    <button class="mentor-btn">+</button>
-                </div>
-            </div>
-
-            <!-- MENTOR 3 -->
-            <div class="col-12 mentor-item" data-rating="3">
-                <div class="mentor-card">
-                    <img src="../Img/default-user.png" class="mentor-photo">
-
-                    <div class="flex-grow-1">
-                        <h5 class="fw-bold mb-1">Carlos Martínez <span class="badge bg-warning text-dark">⭐⭐⭐ 3.5</span></h5>
-                        <p class="mb-1 small text-muted">Data Analyst · Specializzato in AI</p>
-                        <p class="small mb-0">Lingue: Inglese, Spagnolo</p>
-                    </div>
-
-                    <button class="mentor-btn">+</button>
-                </div>
-            </div>
-
-        </div>
+        <!-- LISTA MENTORI (dinamica) -->
+        <div id="mentorsList" class="row g-3"></div>
     </div>
 
     <!-- NAVBAR LOADER -->
@@ -190,33 +143,18 @@
                     localStorage.clear();
                     window.location.href = "Log.html";
                 });
+
+                // Dashboard link by role
+                const role = localStorage.getItem('role');
+                const dash = document.getElementById('dashboardLink');
+                if (dash) {
+                    dash.href = role === 'mentor' ? 'MentorDashBoard.html' : 'MenteeDashBoard.html';
+                }
             });
     </script>
 
-    <!-- FILTRO DE ESTRELLAS -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const mentorItems = document.querySelectorAll('.mentor-item');
-            const selects = document.querySelectorAll('.form-select');
-            const ratingFilterSelect = selects[3]; // El cuarto select es el de valutación
-
-            if (ratingFilterSelect) {
-                ratingFilterSelect.addEventListener('change', function() {
-                    const selectedRating = this.value;
-                    
-                    mentorItems.forEach(mentor => {
-                        const mentorRating = parseInt(mentor.getAttribute('data-rating'));
-                        
-                        if (selectedRating === '' || mentorRating >= parseInt(selectedRating)) {
-                            mentor.style.display = 'block';
-                        } else {
-                            mentor.style.display = 'none';
-                        }
-                    });
-                });
-            }
-        });
-    </script>
+    <!-- Catalogo JS -->
+    <script src="../JS/CatalogoMentors.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

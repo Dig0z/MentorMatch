@@ -68,54 +68,54 @@
                         <!-- NOME (no editable) -->
                         <div class="col-md-6">
                             <label class="form-label">Nome</label>
-                            <div class="form-control bg-light">{{NOME}}</div>
+                            <div id="nameField" class="form-control bg-light">{{NOME}}</div>
                         </div>
 
                         <!-- COGNOME (no editable) -->
                         <div class="col-md-6">
                             <label class="form-label">Cognome</label>
-                            <div class="form-control bg-light">{{COGNOME}}</div>
+                            <div id="surnameField" class="form-control bg-light">{{COGNOME}}</div>
                         </div>
 
                         <!-- EMAIL (no editable) -->
                         <div class="col-md-12">
                             <label class="form-label">Email</label>
-                            <div class="form-control bg-light">{{EMAIL}}</div>
+                            <div id="emailField" class="form-control bg-light">{{EMAIL}}</div>
                         </div>
 
                         <!-- SECTOR (CHECKBOXES) -->
-                        <div class="col-md-12">
+                        <div class="col-md-12" id="sectorSection">
                             <label class="form-label">Settori di competenza</label>
 
                             <div class="sector-box">
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Programmazione" id="sector1">
+                                    <input class="form-check-input sector-checkbox" type="checkbox" value="Programmazione" id="sector1" disabled>
                                     <label class="form-check-label" for="sector1">Programmazione</label>
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Design" id="sector2">
+                                    <input class="form-check-input sector-checkbox" type="checkbox" value="Design" id="sector2" disabled>
                                     <label class="form-check-label" for="sector2">Design</label>
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Marketing" id="sector3">
+                                    <input class="form-check-input sector-checkbox" type="checkbox" value="Marketing" id="sector3" disabled>
                                     <label class="form-check-label" for="sector3">Marketing</label>
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Business" id="sector4">
+                                    <input class="form-check-input sector-checkbox" type="checkbox" value="Business" id="sector4" disabled>
                                     <label class="form-check-label" for="sector4">Business</label>
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Data Science" id="sector5">
+                                    <input class="form-check-input sector-checkbox" type="checkbox" value="Data Science" id="sector5" disabled>
                                     <label class="form-check-label" for="sector5">Data Science</label>
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="AI / Machine Learning" id="sector6">
+                                    <input class="form-check-input sector-checkbox" type="checkbox" value="AI / Machine Learning" id="sector6" disabled>
                                     <label class="form-check-label" for="sector6">AI / Machine Learning</label>
                                 </div>
 
@@ -125,12 +125,12 @@
                         <!-- BIO -->
                         <div class="col-md-12">
                             <label class="form-label">Biografia</label>
-                            <textarea id="bio" class="form-control" rows="4" placeholder="Scrivi una breve descrizione..."></textarea>
+                            <textarea id="bio" class="form-control" rows="4" placeholder="Scrivi una breve descrizione..." disabled></textarea>
                         </div>
 
                     </div>
 
-                    <button class="btn btn-primary w-100" onclick="saveProfile()">Salva Modifiche</button>
+                    <button id="editSaveBtn" class="btn btn-primary w-100">Modifica</button>
 
                 </div>
 
@@ -170,29 +170,162 @@
                     localStorage.clear();
                     window.location.href = "Log.html";
                 });
+
+                // Dashboard link by role
+                const role = localStorage.getItem('role');
+                const dash = document.getElementById('dashboardLink');
+                if (dash) {
+                    dash.href = role === 'mentor' ? 'MentorDashBoard.html' : 'MenteeDashBoard.html';
+                }
             });
     </script>
 
     <!-- SCRIPT PERFIL -->
     <script>
+        // Muestra/oculta sectores según rol guardado en login
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('role');
+            if (role !== 'mentor') {
+                const section = document.getElementById('sectorSection');
+                if (section) section.classList.add('d-none');
+            }
+
+            // Cargar datos del usuario autenticado
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'Log.html';
+                return;
+            }
+            fetch('http://localhost:3000/api/user/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(r => r.json())
+            .then(j => {
+                const d = j?.data;
+                if (!d) return;
+                document.getElementById('nameField').textContent = d.name ?? '';
+                document.getElementById('surnameField').textContent = d.surname ?? '';
+                document.getElementById('emailField').textContent = d.email ?? '';
+                // Si es mentor, precargar sectores
+                if (role === 'mentor') {
+                    loadSectors(token);
+                }
+            })
+            .catch(err => console.error('Load profile failed', err));
+        });
+
+        let initialSectors = new Set();
+
+        async function loadSectors(token) {
+            try {
+                const res = await fetch('http://localhost:3000/api/mentor_sector/get_sectors', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                const sectors = data?.data?.sectors || [];
+                initialSectors = new Set(sectors.map(s => s.sector_name));
+                document.querySelectorAll('.sector-checkbox').forEach(chk => {
+                    chk.checked = initialSectors.has(chk.value);
+                });
+            } catch (e) {
+                console.error('Load sectors failed', e);
+            }
+        }
+
+        function setSectorInputsDisabled(disabled) {
+            document.querySelectorAll('.sector-checkbox').forEach(chk => {
+                if (disabled) chk.setAttribute('disabled', '');
+                else chk.removeAttribute('disabled');
+            });
+        }
+
+        function getSelectedSectors() {
+            const list = [];
+            document.querySelectorAll('.sector-checkbox:checked').forEach(chk => list.push(chk.value));
+            return new Set(list);
+        }
+
         function uploadPhoto() {
             alert("Sistema di caricamento foto da collegare al backend.");
         }
 
-        function saveProfile() {
-            const selected = [];
+        // Toggle Modifica/Salva y persiste la bio
+        document.getElementById('editSaveBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('editSaveBtn');
+            const bioEl = document.getElementById('bio');
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            if (!token) {
+                window.location.href = 'Log.html';
+                return;
+            }
 
-            document.querySelectorAll(".form-check-input:checked").forEach(chk => {
-                selected.push(chk.value);
-            });
+            if (btn.textContent.trim().toLowerCase() === 'modifica') {
+                bioEl.removeAttribute('disabled');
+                bioEl.focus();
+                btn.textContent = 'Salva';
+                if (role === 'mentor') setSectorInputsDisabled(false);
+                return;
+            }
 
-            const bio = document.getElementById("bio").value;
+            // Salvar
+            const new_bio = bioEl.value;
+            try {
+                const res = await fetch('http://localhost:3000/api/user/update_bio', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ bio: new_bio, new_bio: new_bio })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const msg = data?.details?.map?.(e => e.message).join('\n') || data?.message || 'Errore nel salvataggio';
+                    alert(msg);
+                    return;
+                }
 
-            console.log("Settori selezionati:", selected);
-            console.log("Biografia:", bio);
+                // Sync sectores si es mentor
+                if (role === 'mentor') {
+                    const current = getSelectedSectors();
+                    const toAdd = [...current].filter(x => !initialSectors.has(x));
+                    const toRemove = [...initialSectors].filter(x => !current.has(x));
 
-            alert("Profilo aggiornato! (backend da collegare)");
-        }
+                    const addCalls = toAdd.map(name => fetch('http://localhost:3000/api/mentor_sector/add_sector', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ sector_name: name })
+                    }));
+                    const removeCalls = toRemove.map(name => fetch('http://localhost:3000/api/mentor_sector/remove_sector', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ sector_name: name })
+                    }));
+                    const responses = await Promise.all([...addCalls, ...removeCalls]);
+                    const allOk = responses.every(r => r.ok);
+                    if (!allOk) {
+                        alert('Alcuni settori non sono stati salvati');
+                    } else {
+                        initialSectors = current;
+                    }
+                }
+
+                bioEl.setAttribute('disabled', '');
+                setSectorInputsDisabled(true);
+                btn.textContent = 'Modifica';
+                alert('Profilo salvato');
+            } catch (e) {
+                console.error(e);
+                alert('Impossibile salvare la biografia');
+            }
+        });
     </script>
 
     <!-- Bootstrap JS -->

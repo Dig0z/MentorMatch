@@ -15,12 +15,19 @@
 
             <!-- Logo -->
             <div class="text-center mb-3">
-                <div class="bg-secondary rounded-circle mx-auto" 
-                     style="width:60px;height:60px;"></div>
+                <img src="../IMG/LogoMentorMatch.png" alt="MentorMatch logo" class="rounded-circle d-block mx-auto" style="width:60px;height:60px;object-fit:cover;" />
             </div>
 
             <!-- Título -->
             <h3 class="text-center mb-4">Register</h3>
+
+            <!-- Nome -->
+            <label class="form-label">Nome</label>
+            <input type="text" id="name" class="form-control mb-3" placeholder="Inserisci nome">
+
+            <!-- Cognome -->
+            <label class="form-label">Cognome</label>
+            <input type="text" id="surname" class="form-control mb-3" placeholder="Inserisci cognome">
 
             <!-- Email -->
             <label class="form-label">Email</label>
@@ -34,14 +41,21 @@
             <label class="form-label">Conferma Password</label>
             <input type="password" id="password2" class="form-control mb-4" placeholder="Ripeti password">
 
+            <!-- Ruolo -->
+            <label class="form-label" for="role">Ruolo</label>
+            <select id="role" class="form-select mb-4" aria-label="Seleziona ruolo">
+                <option value="mentee" selected>Mentee</option>
+                <option value="mentor">Mentor</option>
+            </select>
+
             <!-- Botones -->
             <div class="d-flex justify-content-between">
-                <a href="log.html" class="btn btn-outline-primary">Log In</a>
+                <a href="Log.html" class="btn btn-outline-primary">Log In</a>
                 <button id="registerBtn" class="btn btn-primary">Continue</button>
             </div>
 
         </div>
     </div>
-
+    <script src="../JS/Register.js"></script>
 </body>
 </html>
