@@ -58,18 +58,20 @@ async function get_reviews(email) {
 
 async function delete_review(mentee_id, review_id) {
     const {id} = review_id;
-    const role = user_service.get_role(mentee_id);
+    const role = await user_service.get_role(mentee_id);
     if(role != 'mentee') {
         const err = new Error('This function is for mentees only');
         err.status = 403;
         throw err;
     }
-    const {mentee_id:check_mentee} = await review_repository.check_mentee_id(id);
-    if(!check_mentee) {
+    console.log(mentee_id);
+    const mentee = await review_repository.check_mentee_id(id);
+    if(!mentee) {
         const err = new Error('Review not found');
         err.status = 404;
         throw err;
     }
+    const {mentee_id:check_mentee} = mentee;
     if(check_mentee != mentee_id) {
         const err = new Error('Review can only be deleted by writer');
         err.status = 403;

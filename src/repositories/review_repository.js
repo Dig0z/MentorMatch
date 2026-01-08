@@ -41,6 +41,7 @@ async function delete_review(id) {
         RETURNING rating, comment
     `;
     const review = await pool.query(query, [id]);
+    return review.rows[0];
 }
 
 async function check_mentee_id(id) {
@@ -49,8 +50,8 @@ async function check_mentee_id(id) {
         FROM reviews
         WHERE id = $1
     `;
-    const rating = await pool.query(query, [id]);
-    return result.rows[0];
+    const review = await pool.query(query, [id]);
+    return review.rows[0];
 }
 
 module.exports = {
