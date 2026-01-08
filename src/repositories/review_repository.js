@@ -33,8 +33,30 @@ async function get_reviews(mentor_id) {
     return reviews.rows;
 }
 
+async function delete_review(id) {
+    const query = `
+        DELETE
+        FROM reviews
+        WHERE id = $1
+        RETURNING rating, comment
+    `;
+    const review = await pool.query(query, [id]);
+}
+
+async function check_mentee_id(id) {
+    const query = `
+        SELECT mentee_id
+        FROM reviews
+        WHERE id = $1
+    `;
+    const rating = await pool.query(query, [id]);
+    return result.rows[0];
+}
+
 module.exports = {
     add_review,
     check_double_review,
-    get_reviews
+    get_reviews,
+    delete_review,
+    check_mentee_id
 };

@@ -4,7 +4,7 @@ const user_service = require('../services/user_service.js');
 async function add_review(mentee_id, email, review) {
     const mentee_role = await user_service.get_role(mentee_id);
     if(mentee_role != 'mentee') {
-        const err = new Error('This function is only for mentees');
+        const err = new Error('This function is for mentees only');
         err.status = 403;
         throw err;
     }
@@ -56,7 +56,30 @@ async function get_reviews(email) {
     return reviews;
 } 
 
+async function delete_review(mentee_id, review_id) {
+    const {id} = review_id;
+    const role = user_service.get_role(mentee_id);
+    if(role != 'mentee') {
+        const err = new Error('This function is for mentees only');
+        err.status = 403;
+        throw err;
+    }
+    const {mentee_id:check_mentee} = await review_repository.check_mentee_id(id);
+    if(!check_mentee) {
+        const err = new Error('Review not found');
+        err.status = 404;
+        throw err;
+    }
+    if(check_mentee != mentee_id) {
+        const err = new Error('Review can only be deleted by writer');
+        err.status = 403;
+        throw err;
+    }
+    return await review_repository.delete_review(id);
+}
+
 module.exports = {
     add_review,
-    get_reviews
+    get_reviews,
+    delete_review
 };
