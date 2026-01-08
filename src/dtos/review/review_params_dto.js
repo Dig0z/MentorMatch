@@ -1,8 +1,8 @@
-const add_review_params_dto = {
+const review_params_dto = {
     mentor_email: {
         required: true,
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     }
 };
 
-module.exports = add_review_params_dto;
+module.exports = review_params_dto;

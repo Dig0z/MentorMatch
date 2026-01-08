@@ -33,6 +33,30 @@ async function add_review(mentee_id, email, review) {
     return {mentor_email, rating:rat, comment:com};
 }
 
+async function get_reviews(email) {
+    const {mentor_email} = email;
+    const mentor_id = await user_service.get_id_from_email(mentor_email);
+    if(!mentor_id) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+    }
+    const reviews = await review_repository.get_reviews(mentor_id);
+    if(reviews.length == 0) {
+        const err = new Error('No review for this mentor');
+        err.status = 404;
+        throw err;
+    }
+    for(let i = 0; i < reviews.length; i++) {
+        const {mentee_id} = reviews[i];
+        const mentee_email = user_service.get_email_from_id(mentee_id);
+        const {id, rating, comment} = reviews[i];
+        reviews[i] = {id, mentee_email, rating, comment};
+    }
+    return reviews;
+} 
+
 module.exports = {
-    add_review
+    add_review,
+    get_reviews
 };

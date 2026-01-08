@@ -109,11 +109,21 @@ async function get_id_from_email(email) {
 async function get_role(user_id) {
     const {role} = await user_repository.get_role(user_id);
     if(!role) {
-        const err = new Error('Failed to retrieve role');
-        err.status = 500;
+        const err = new Error('User not found');
+        err.status = 404;
         throw err;
     }
     return role;
+}
+
+async function get_email_from_id(id) {
+    const {email} = await user_repository.get_email_from_id(id);
+    if(!email) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+    }
+    return email;
 }
 
 module.exports = {
@@ -125,5 +135,6 @@ module.exports = {
     update_bio,
     update_photo_url,
     get_id_from_email,
+    get_email_from_id,
     get_role
 };
