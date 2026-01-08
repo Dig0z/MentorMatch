@@ -38,6 +38,7 @@ async function login(login_data) {
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     );
+    console.log('Logged in');
     return {valid, token};
 }
 
@@ -49,6 +50,7 @@ async function update_name(user_id, user_data) {
         err.status(404);
         throw err;
     }
+    console.log(`Name updated to ${name}`);
     return name;
 }
 
@@ -60,6 +62,7 @@ async function update_surname(user_id, user_data) {
         err.status(404);
         throw err;
     }
+    console.log(`Surname updated to ${surname}`);
     return surname;
 }
 
@@ -71,6 +74,7 @@ async function update_bio(user_id, user_data) {
         err.status(404);
         throw err;
     }
+    console.log(`Bio updated`);
     return bio;
 }
 
@@ -82,6 +86,7 @@ async function update_photo_url(user_id, user_data) {
         err.status(404);
         throw err;
     }
+    console.log(`Photo url updated`);
     return photo_url;
 }
 
@@ -93,6 +98,7 @@ async function get_mentors(filters) {
         err.status = 404;
         throw err;
     }
+    console.log(`Found ${result.length} mentors`);
     return result;
 }
 

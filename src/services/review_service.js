@@ -30,6 +30,7 @@ async function add_review(mentee_id, email, review) {
     }
     const result = await review_repository.add_review(mentor_id, mentee_id, rating, comment);
     const {rating:rat, comment:com} = result;
+    console.log(`Review added`);
     return {mentor_email, rating:rat, comment:com};
 }
 
@@ -53,6 +54,7 @@ async function get_reviews(email) {
         const {id, rating, comment} = reviews[i];
         reviews[i] = {id, mentee_email, rating, comment};
     }
+    console.log(`${reviews.length} reviews found for this mentor`);
     return reviews;
 } 
 
@@ -77,6 +79,7 @@ async function delete_review(mentee_id, review_id) {
         err.status = 403;
         throw err;
     }
+    console.log(`Review removed`);
     return await review_repository.delete_review(id);
 }
 

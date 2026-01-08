@@ -7,6 +7,11 @@ async function book_session(mentee_id, session_data) {
     const {mentor_email, date, start_time, end_time} = session_data;
     await availability_service.get_availability(date, start_time, end_time); //vedo solo se ritorna errore oppure no
     const mentor_id = await user_service.get_id_from_email(mentor_email);
+    if(!mentor_id) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+    }
     const status = 'pending';
     const start_datetime = `${date} ${start_time}`;
     const end_datetime = `${date} ${end_time}`;
@@ -16,6 +21,7 @@ async function book_session(mentee_id, session_data) {
         err.status = 500;
         throw err;
     }
+    console.log(`Session booked on ${date}, ${start_time} - ${end_time}. Status: ${status}`);
     return session;
 }
 
@@ -47,6 +53,7 @@ async function confirm_booking(mentor_id, session_id) {
         err.status = 500;
         throw err;
     }
+    console.log(`Booking confermed for session on ${start_datetime} - ${end_datetime}. Meet link: ${meeting_link}`);
     return session;
 }
 
@@ -55,12 +62,13 @@ async function confirm_booking(mentor_id, session_id) {
 async function cancel_session(user_id, session_id) {
     const {id} = session_id;
     const session = await session_repository.update_status(id, user_id, 'cancelled');
-    const {status} = session;
+    const {start_datetime, end_datetime, status} = session;
     if(!status || status != 'cancelled') {
         const err = new Error('Failed to cancel session');
         err.status = 500;
         throw err;
     }
+    console.log(`Booking cancelled for session on ${start_datetime} - ${end_datetime}`);
     return session;
 }
 
@@ -72,13 +80,14 @@ async function confirm_cancellation(user_id, session_id) {
         err.status = 404;
         throw err;
     }
-    const {status:check_status} = session;
+    const {start_datetime, end_datetime, status:check_status} = session;
     if(check_status != 'cancelled') {
         const err = new Error('Cannot confirm cancellation. Notify other user first,');
         err.status = 409;
         throw err;
     }
     const deleted_session = await session_repository.delete_session(id, user_id);
+    console.log(`Booking for session on ${start_datetime} - ${end_datetime} removed`);
     return deleted_session;
 }
 
@@ -90,6 +99,7 @@ async function get_user_sessions(user_id) {
         err.status = 404;
         throw err;
     }
+    console.log(`${sessions.length} sessions booked`);
     return sessions;
 }
 

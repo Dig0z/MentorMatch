@@ -8,6 +8,7 @@ async function add_sector(mentor_id, new_name) {
         err.status = 500;
         throw err;
     }
+    console.log(`Sector ${sector_name} added`);
     return name;
 };
 
@@ -18,6 +19,7 @@ async function get_sectors(mentor_id) {
         err.status = 404;
         throw err;
     }
+    console.log(`${sectors.length} sectors found`);
     return sectors;
 };
 
@@ -35,6 +37,7 @@ async function change_sector(mentor_id, names) {
         err.status = 500;
         throw err;
     }
+    console.log(`${old_name} sector changed to ${new_name}`);
     return name;
 };
 
@@ -52,6 +55,7 @@ async function remove_sector(mentor_id, old_name) {
         err.status = 500;
         throw err;
     }
+    console.log(`${old_name} sector removed`);
     return verify;
 };
 

@@ -80,8 +80,8 @@ async function createMeetLink(start_datetime, end_datetime) {
             }
         }
     });
-
-  return res.data.hangoutLink;
+    console.log(`Google Meet link created`);
+    return res.data.hangoutLink;
 }
 
 function cypher(string) {
