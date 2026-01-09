@@ -9,6 +9,7 @@ function handle_error(err, req, res, next) {
     res.status(status).json({
         'success': false,
         'error': {
+            'status': status,
             'message': message,
             'details': details || message
         }

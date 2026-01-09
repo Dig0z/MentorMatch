@@ -12,6 +12,7 @@ async function add_availability(mentor_id, weekday, start_time, end_time) {
     return result.rows[0];
 };
 
+// NOTE: `weekday` column in DB stores a DATE (misnamed). We filter by concrete date.
 async function check_availability(mentor_id, dateStr) {
     const query = `
         SELECT id, weekday, start_time, end_time
@@ -56,7 +57,7 @@ async function remove_all(mentor_id) {
     return dates.rows;
 }
 
-async function get_availability(mentor_id, dateStr, start_time, end_time) {
+async function get_availability(mentor_id, weekday, start_time, end_time) {
     const query = `
         SELECT id
         FROM mentor_availability
@@ -65,8 +66,20 @@ async function get_availability(mentor_id, dateStr, start_time, end_time) {
         AND start_time <= $3::time
         AND end_time >= $4::time
     `;
-    const availability = await pool.query(query, [mentor_id, dateStr, start_time, end_time]); 
+    const availability = await pool.query(query, [mentor_id, weekday, start_time, end_time]); 
     return availability.rows[0];
+}
+
+async function get_day_availabilities(mentor_id, dateStr) {
+    const query = `
+        SELECT id, weekday, start_time, end_time
+        FROM mentor_availability
+        WHERE mentor_id = $1
+        AND weekday = $2::date
+        ORDER BY start_time ASC
+    `;
+    const result = await pool.query(query, [mentor_id, dateStr]);
+    return result.rows;
 }
 
 module.exports = {
@@ -75,5 +88,6 @@ module.exports = {
     get_availabilities,
     remove_availability,
     remove_all,
-    get_availability
+    get_availability,
+    get_day_availabilities
 }

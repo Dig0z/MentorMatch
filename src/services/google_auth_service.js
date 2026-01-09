@@ -59,7 +59,7 @@ async function loadSavedTokens() {
     client.setCredentials(plain_tokens);
 }
 
-async function createMeetLink() {
+async function createMeetLink(start_datetime, end_datetime) {
     const calendar = google.calendar({ version: 'v3', auth: client });
 
     const res = await calendar.events.insert({
@@ -67,6 +67,12 @@ async function createMeetLink() {
         conferenceDataVersion: 1,
         requestBody: {
             summary: 'Session confirmed',
+            start: {
+                dateTime: start_datetime
+            },
+            end: {
+                dateTime: end_datetime
+            },
             conferenceData: {
                 createRequest: {
                     requestId: 'id-' + Date.now()

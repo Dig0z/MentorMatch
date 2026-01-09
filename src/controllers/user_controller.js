@@ -23,14 +23,24 @@ router.post('/register', validate(register_dto), async (req, res) => {
 
 router.post('/login', validate(login_dto), async (req, res) => {
     const payload = await user_service.login(req.body);
-    const {valid, token} = payload;
+    const {valid, token, role} = payload;
     if(valid) {
         res.status(200).json({
             message: 'Login succesful',
             success: valid,
-            data: {token}
+            data: {token, role}
         });
     }
+});
+
+router.get('/me', auth, async (req, res) => {
+    const user_id = req.user.id;
+    const me = await user_service.get_me(user_id);
+    res.status(200).json({
+        message: 'User data',
+        success: true,
+        data: me
+    });
 });
 
 router.get('/get_mentors', validate(get_mentors_dto, 'query'), async (req, res) => {
@@ -62,9 +72,9 @@ router.patch('/update_surname', validate(update_surname_dto, 'params'), validate
     });
 });
 
-router.patch('/update_bio', validate(update_bio_dto, 'params'), validate(update_bio_dto, 'body'), auth, async (req, res) => {
+router.patch('/update_bio', validate(update_bio_dto, 'body'), auth, async (req, res) => {
     const user_id = req.user.id;
-    const {bio} = await user_service.update_email(user_id, req.body);
+    const {bio} = await user_service.update_bio(user_id, req.body);
     res.status(200).json({
         message: 'Bio changed',
         success: true,
@@ -72,9 +82,9 @@ router.patch('/update_bio', validate(update_bio_dto, 'params'), validate(update_
     });
 });
 
-router.patch('/update_photo_url', validate(update_photo_url_dto, 'params'), validate(update_photo_url_dto, 'body'), auth, async (req, res) => {
+router.patch('/update_photo_url', validate(update_photo_url_dto, 'body'), auth, async (req, res) => {
     const user_id = req.user.id;
-    const {photo_url} = await user_service.update_name(user_id, req.body);
+    const {photo_url} = await user_service.update_photo_url(user_id, req.body);
     res.status(200).json({
         message: 'Profile pic changed',
         success: true,

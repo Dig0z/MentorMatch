@@ -13,7 +13,7 @@ async function register_user(name, surname, email, password_hash, role, bio, pho
     const query = `
         INSERT INTO users(name, surname, email, password_hash, role, bio, photo_url)
         VALUES($1, $2, $3, $4,$5, $6, $7)
-        RETURNING name, surname, email, role, bio, photo_url
+        RETURNING id, name, surname, email, role, bio, photo_url
     `;
     const result = await pool.query(query, [name, surname, email, password_hash, role, bio, photo_url]);
     return result.rows[0];
@@ -21,7 +21,7 @@ async function register_user(name, surname, email, password_hash, role, bio, pho
 
 async function get_login_data(email) {
     const query = `
-        SELECT id, password_hash
+        SELECT id, password_hash, role
         FROM users
         WHERE email LIKE $1
     `;
@@ -77,8 +77,20 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     let index = 0;
     const values = [];
     let query = `
-        SELECT u.name, u.surname, u.email, u.bio, u.photo_url, ma.weekday, ma.start_time, ma.end_time, ms.sector_name 
-        FROM users u left join mentor_availability ma on u.id = ma.mentor_id left join mentor_sectors ms on u.id = ms.mentor_id
+        SELECT u.name, u.surname, u.email, u.bio, u.photo_url,
+               ma.weekday, ma.start_time, ma.end_time,
+               ms.sector_name,
+               ul.language_name,
+               r.avg_rating
+        FROM users u
+        LEFT JOIN mentor_availability ma ON u.id = ma.mentor_id
+        LEFT JOIN mentor_sectors ms ON u.id = ms.mentor_id
+        LEFT JOIN user_languages ul ON u.id = ul.user_id
+        LEFT JOIN (
+            SELECT mentor_id, ROUND(AVG(rating)::numeric, 1) AS avg_rating
+            FROM reviews
+            GROUP BY mentor_id
+        ) r ON u.id = r.mentor_id
         WHERE u.role = 'mentor'
     `;
     
@@ -134,6 +146,16 @@ async function get_id_from_email(email) {
     return result.rows[0];
 }
 
+async function get_public_data(user_id) {
+    const query = `
+        SELECT name, surname, email, role, bio, photo_url
+        FROM users
+        WHERE id = $1
+    `;
+    const result = await pool.query(query, [user_id]);
+    return result.rows[0];
+}
+
 module.exports = {
     get_users,
     register_user,
@@ -143,5 +165,6 @@ module.exports = {
     update_bio,
     update_photo_url,
     get_mentors,
-    get_id_from_email
+    get_id_from_email,
+    get_public_data
 };

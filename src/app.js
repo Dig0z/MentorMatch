@@ -4,10 +4,15 @@ const exception_handler = require('./middlewares/exception_handler.js');
 const express = require('express');
 const app = express();
 const bootstrap = require('./bootstrap.js');
+const cors = require('cors');
 
 require('./config/db.js');
 
+app.use(cors());
 app.use(express.json());
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 const routes = require('./routes.js');
 app.use('/api', routes);

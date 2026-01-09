@@ -26,7 +26,7 @@ async function login(login_data) {
         err.status = 404;
         throw err;
     }
-    const {id, password_hash} = identity;
+    const {id, password_hash, role} = identity;
     const valid = await bcrypt.compare(password, password_hash);
     if(!valid) {
         const err = new Error('Invalid password');
@@ -38,51 +38,55 @@ async function login(login_data) {
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     );
-    return {valid, token};
+    return {valid, token, role};
 };
 
 async function update_name(user_id, user_data) {
-    const {new_name} = user_data;
-    const {name} = await user_repository.update_name(user_id, new_name);
+    const new_name = user_data.new_name ?? user_data.name;
+    const result = await user_repository.update_name(user_id, new_name);
+    const {name} = result || {};
     if(!name) {
         const err = new Error('User not found');
-        err.status(404);
+        err.status = 404;
         throw err;
     }
-    return name;
+    return {name};
 };
 
 async function update_surname(user_id, user_data) {
-    const {new_surname} = user_data;
-    const {surname} = await user_repository.update_name(user_id, new_surname);
+    const new_surname = user_data.new_surname ?? user_data.surname;
+    const result = await user_repository.update_surname(user_id, new_surname);
+    const {surname} = result || {};
     if(!surname) {
         const err = new Error('User not found');
-        err.status(404);
+        err.status = 404;
         throw err;
     }
-    return surname;
+    return {surname};
 };
 
 async function update_bio(user_id, user_data) {
-    const {new_bio} = user_data;
-    const {bio} = await user_repository.update_name(user_id, new_bio);
-    if(!bio) {
+    const new_bio = user_data.new_bio ?? user_data.bio;
+    const result = await user_repository.update_bio(user_id, new_bio);
+    const {bio} = result || {};
+    if(bio === undefined) {
         const err = new Error('User not found');
-        err.status(404);
+        err.status = 404;
         throw err;
     }
-    return bio;
+    return {bio};
 };
 
 async function update_photo_url(user_id, user_data) {
     const {new_url} = user_data;
-    const {photo_url} = await user_repository.update_name(user_id, new_url);
-    if(!photo_url) {
+    const result = await user_repository.update_photo_url(user_id, new_url);
+    const {photo_url} = result || {};
+    if(photo_url === undefined) {
         const err = new Error('User not found');
-        err.status(404);
+        err.status = 404;
         throw err;
     }
-    return photo_url;
+    return {photo_url};
 };
 
 async function get_mentors(filters) {
@@ -106,6 +110,16 @@ async function get_id_from_email(email) {
     return id;
 };
 
+async function get_me(user_id) {
+    const data = await user_repository.get_public_data(user_id);
+    if(!data) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+    }
+    return data;
+};
+
 module.exports = {
     register,
     login,
@@ -115,4 +129,5 @@ module.exports = {
     update_bio,
     update_photo_url,
     get_id_from_email
+    ,get_me
 };
