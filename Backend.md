@@ -44,7 +44,9 @@ src/
 	controllers/
 	services/
 	repositories/
-	dots/
+	dtos/
 	middleware/
 	config/
 	app.js
+	bootstrap.js
+	routes.js
