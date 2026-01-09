@@ -1,4 +1,5 @@
 const user_repository = require('../repositories/user_repository.js');
+const {send_notification} = require('./notification_service.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -15,6 +16,9 @@ async function register(user_data) {
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     );
+    console.log(`Registration completed`);
+    const message = 'Hello and welcome to your new account!\nStart exploring MentorMatch and find the best opportunity for you!'
+    await send_notification(user.id, message);
     return {user, token};
 }
 

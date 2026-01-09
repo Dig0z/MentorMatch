@@ -1,5 +1,6 @@
 const review_repository = require('../repositories/review_repository.js');
 const user_service = require('../services/user_service.js');
+const {send_notification} = require('./notification_service.js');
 
 async function add_review(mentee_id, email, review) {
     const mentee_role = await user_service.get_role(mentee_id);
@@ -31,6 +32,10 @@ async function add_review(mentee_id, email, review) {
     const result = await review_repository.add_review(mentor_id, mentee_id, rating, comment);
     const {rating:rat, comment:com} = result;
     console.log(`Review added`);
+    const message = `
+        A mentee has left a review about you! Go and read it!
+    `;
+    send_notification(mentor_id, message);
     return {mentor_email, rating:rat, comment:com};
 }
 
@@ -67,19 +72,23 @@ async function delete_review(mentee_id, review_id) {
         throw err;
     }
     console.log(mentee_id);
-    const mentee = await review_repository.check_mentee_id(id);
-    if(!mentee) {
+    const review = await review_repository.get_review(id);
+    const {mentor_id, mentee_id:check_mentee} = review;
+    if(!review) {
         const err = new Error('Review not found');
         err.status = 404;
         throw err;
     }
-    const {mentee_id:check_mentee} = mentee;
     if(check_mentee != mentee_id) {
         const err = new Error('Review can only be deleted by writer');
         err.status = 403;
         throw err;
     }
     console.log(`Review removed`);
+    const message = `
+        One of the reviews about you was removed!
+    `;
+    send_notification(mentor_id, message);
     return await review_repository.delete_review(id);
 }
 

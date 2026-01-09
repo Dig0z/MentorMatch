@@ -2,7 +2,7 @@ const notification_repository = require('../repositories/notification_repository
 
 async function send_notification(user_id, message) {
     const notification = await notification_repository.send_notification(user_id, message);
-    console.log(`Notification correctly sent`);
+    console.log(`Notification correctly sent. Message: "${message}"`);
     return notification;
 }
 

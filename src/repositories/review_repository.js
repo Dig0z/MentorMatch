@@ -44,9 +44,9 @@ async function delete_review(id) {
     return review.rows[0];
 }
 
-async function check_mentee_id(id) {
+async function get_review(id) {
     const query = `
-        SELECT mentee_id
+        SELECT *
         FROM reviews
         WHERE id = $1
     `;
@@ -59,5 +59,5 @@ module.exports = {
     check_double_review,
     get_reviews,
     delete_review,
-    check_mentee_id
+    get_review
 };
