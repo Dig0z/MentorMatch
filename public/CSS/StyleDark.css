@@ -1,0 +1,113 @@
+/* ====== Dark Mode Base ====== */
+
+body {
+    background: #0f0f10;
+    color: #e6e6e6;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ====== Card ====== */
+
+.card {
+    background: #1a1b1e;
+    border: 1px solid #2a2b2e;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.4);
+}
+
+/* ====== Logo Placeholder ====== */
+
+.logo-placeholder {
+    width: 60px;
+    height: 60px;
+    background-color: #3a3b3e;
+    border-radius: 50%;
+}
+
+/* ====== Titles ====== */
+
+h3, h1, h2 {
+    color: #f0f0f0;
+    font-weight: 600;
+}
+
+/* ====== Labels ====== */
+
+.form-label {
+    color: #bbbbbb;
+    font-weight: 500;
+}
+
+/* ====== Inputs ====== */
+
+.form-control {
+    background-color: #2b2c30;
+    color: #e6e6e6;
+    border: 1px solid #3c3d41;
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.2s;
+}
+
+.form-control::placeholder {
+    color: #8a8a8a;
+}
+
+.form-control:focus {
+    background-color: #323338;
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 0.15rem rgba(110, 168, 254, 0.35);
+}
+
+/* ====== Buttons ====== */
+
+.btn-primary {
+    background-color: #4a90e2;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: 0.2s;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3a7ac5;
+}
+
+.btn-outline-primary {
+    border-radius: 10px;
+    padding: 10px 20px;
+    border-width: 2px;
+    border-color: #4a90e2;
+    color: #4a90e2;
+    transition: 0.2s;
+}
+
+.btn-outline-primary:hover {
+    background-color: #4a90e2;
+    color: #ffffff;
+}
+
+/* ====== Links ====== */
+
+a {
+    text-decoration: none;
+    font-weight: 500;
+    color: #87b7ff;
+}
+
+a:hover {
+    color: #4a90e2;
+}
+
+/* ====== Card Responsiveness ====== */
+
+@media(max-width: 576px) {
+    .card {
+        width: 100% !important;
+        margin: 0 15px;
+        padding: 25px;
+    }
+}
