@@ -10,15 +10,16 @@ async function register(user_data) {
     const {name, surname, email, password, role, bio = null, photo_url = null} = user_data;
     const password_hash = await bcrypt.hash(password, saltRounds);
     const user = await user_repository.register_user(name, surname, email, password_hash, role, bio, photo_url);
-    console.log('User created');
+    const {id} = user;
+    console.log('User created. user id = ', id);
     const token = jwt.sign(
-        {id: user.id},
+        {id: id},
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     );
     console.log(`Registration completed`);
     const message = 'Hello and welcome to your new account!\nStart exploring MentorMatch and find the best opportunity for you!'
-    await send_notification(user.id, message);
+    await send_notification(id, message);
     return {user, token};
 }
 

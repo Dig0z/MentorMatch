@@ -13,7 +13,7 @@ async function register_user(name, surname, email, password_hash, role, bio, pho
     const query = `
         INSERT INTO users(name, surname, email, password_hash, role, bio, photo_url)
         VALUES($1, $2, $3, $4,$5, $6, $7)
-        RETURNING name, surname, email, role, bio, photo_url
+        RETURNING id, name, surname, email, role, bio, photo_url
     `;
     const result = await pool.query(query, [name, surname, email, password_hash, role, bio, photo_url]);
     return result.rows[0];
