@@ -50,23 +50,19 @@
 
             <!-- FOTO -->
             <div class="col-md-3 text-center">
-                <img src="../Img/default-user.png" class="mentor-photo mb-3">
-                <h5 class="fw-bold mt-2">Marco Bianchi</h5>
-                <p class="text-muted small">Programmazione • 5⭐</p>
+                <img id="mentorPhoto" src="../Img/default-user.png" class="mentor-photo mb-3">
+                <h5 id="mentorName" class="fw-bold mt-2">—</h5>
+                <p id="mentorRating" class="text-muted small">n/d</p>
             </div>
 
             <!-- INFO DEL MENTOR -->
             <div class="col-md-9">
                 <div class="info-box">
                     <h4 class="fw-bold">Informazioni del Mentor</h4>
-                    <p class="mt-3">
-                        Mentor con 10 anni di esperienza in sviluppo web, Java, database e architetture software.
-                        Ha già aiutato più di 200 studenti a migliorare le loro competenze tecniche.
-                    </p>
-
-                    <p><strong>Email:</strong> marco.rossi@example.com</p>
-                    <p><strong>Lingue:</strong> Italiano, Inglese</p>
-                    <p><strong>Sessioni:</strong> 50+ completate</p>
+                    <p id="mentorBio" class="mt-3"></p>
+                    <p id="mentorEmail"><strong>Email:</strong> —</p>
+                    <p id="mentorLang"><strong>Lingue:</strong> —</p>
+                    <p id="mentorSect"><strong>Settori:</strong> —</p>
                 </div>
             </div>
         </div>
@@ -107,9 +103,13 @@
                     <div>
                         <h4 class="fw-bold mb-3">Prenota una Sessione</h4>
                         <p class="text-muted">Seleziona una data nel calendario e conferma la prenotazione.</p>
+                        <div class="mt-3">
+                            <p class="fw-semibold mb-1">Selezione corrente:</p>
+                            <p id="selectedSlot" class="text-muted">Nessuna selezione</p>
+                        </div>
                     </div>
 
-                    <button class="btn btn-success btn-lg mt-3" id="bookBtn">
+                    <button class="btn btn-success btn-lg mt-3" id="bookBtn" disabled>
                         + Prenota
                     </button>
                 </div>
@@ -139,9 +139,22 @@
             });
     </script>
 
+    <!-- GLOBAL STATE FOR BOOKING SELECTION -->
+    <script>
+        var selected = null; // { date, start, end }
+    </script>
+
     <!-- CALENDAR SCRIPT -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+            const API_BASE = 'http://localhost:3000';
+            const params = new URLSearchParams(window.location.search);
+            const email = params.get('email');
+            if (!email) {
+                window.location.href = 'CatalogoMentors.html';
+                return;
+            }
+
             const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
                 initialView: "dayGridMonth",
                 height: 600,
@@ -150,17 +163,76 @@
                     center: "title",
                     right: "dayGridMonth,timeGridWeek,timeGridDay"
                 },
-                selectable: true,
-                dateClick(info) {
-                    alert("Hai selezionato: " + info.dateStr + "\n(qui si aggiungerà la logica di prenotazione)");
-                },
-                events: [
-                    { title: "Occupato", start: "2025-02-10", color: "#d9534f" },
-                    { title: "Disponibile", start: "2025-02-12", color: "#5cb85c" },
-                ]
+                eventClick(info) {
+                    if (info.event.title !== 'Disponibile') return;
+                    const date = info.event.startStr.slice(0, 10); // YYYY-MM-DD
+                    const start = info.event.startStr.slice(11, 16); // HH:MM
+                    const end = info.event.endStr.slice(11, 16);     // HH:MM
+                    selected = { date, start, end };
+                    document.getElementById('selectedSlot').textContent = `${date} • ${start} - ${end}`;
+                    document.getElementById('bookBtn').disabled = false;
+                }
             });
-
             calendar.render();
+
+            try {
+                const res = await fetch(`${API_BASE}/api/user/get_mentors?email=${encodeURIComponent(email)}`);
+                const payload = await res.json();
+                const rows = payload?.data || [];
+                if (rows.length === 0) return;
+
+                // aggregate mentor details
+                const agg = {
+                    name: rows[0].name || '',
+                    surname: rows[0].surname || '',
+                    bio: rows[0].bio || '',
+                    photo: rows[0].photo_url || '',
+                    rating: rows[0].avg_rating || null,
+                    languages: new Set(),
+                    sectors: new Set()
+                };
+                for (const r of rows) {
+                    if (r.language_name) agg.languages.add(r.language_name);
+                    if (r.sector_name) agg.sectors.add(r.sector_name);
+                }
+
+                document.getElementById('mentorName').textContent = `${agg.name} ${agg.surname}`.trim();
+                document.getElementById('mentorBio').textContent = agg.bio || '';
+                document.getElementById('mentorEmail').innerHTML = `<strong>Email:</strong> ${email}`;
+                document.getElementById('mentorLang').innerHTML = `<strong>Lingue:</strong> ${Array.from(agg.languages).join(', ') || '—'}`;
+                document.getElementById('mentorSect').innerHTML = `<strong>Settori:</strong> ${Array.from(agg.sectors).join(', ') || '—'}`;
+                document.getElementById('mentorRating').textContent = agg.rating ? `⭐ ${agg.rating}` : 'n/d';
+                const img = document.getElementById('mentorPhoto');
+                if (img && agg.photo) {
+                    img.src = agg.photo;
+                    img.onerror = () => { img.src = '../Img/default-user.png'; };
+                }
+
+                // Load availability blocks by mentor email (mapped to next dates on backend)
+                try {
+                    const token = localStorage.getItem('token');
+                    const ares = await fetch(`${API_BASE}/api/mentor_availability/get_availabilities_by_email?email=${encodeURIComponent(email)}`, {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                    });
+                    const adata = await ares.json();
+                    const avs = adata?.data || [];
+                    avs.forEach(av => {
+                        const date = typeof av.weekday === 'string' ? av.weekday.slice(0,10) : new Date(av.weekday).toISOString().slice(0,10);
+                        const s = String(av.start_time).slice(0,5);
+                        const e = String(av.end_time).slice(0,5);
+                        calendar.addEvent({
+                            title: 'Disponibile',
+                            start: `${date}T${s}`,
+                            end: `${date}T${e}`,
+                            color: '#5cb85c'
+                        });
+                    });
+                } catch (e) {
+                    console.error('Load mentor availabilities failed', e);
+                }
+            } catch (e) {
+                console.error('Load mentor profile failed', e);
+            }
         });
     </script>
 
@@ -176,8 +248,47 @@
 
     <!-- PRENOTA -->
     <script>
-        document.getElementById("bookBtn").addEventListener("click", () => {
-            alert("Prenotazione registrata! (funzione backend da implementare)");
+        document.getElementById("bookBtn").addEventListener("click", async () => {
+            const API_BASE = 'http://localhost:3000';
+            const token = localStorage.getItem('token');
+            const params = new URLSearchParams(window.location.search);
+            const mentorEmail = params.get('email');
+            if (!token) {
+                alert('Devi fare il login');
+                window.location.href = 'Log.html';
+                return;
+            }
+            if (!mentorEmail || !selected) {
+                alert('Seleziona una disponibilità nel calendario');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/api/session/book_session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        mentor_email: mentorEmail,
+                        date: selected.date,
+                        start_time: selected.start,
+                        end_time: selected.end
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const msg = data?.message || 'Errore durante la prenotazione';
+                    alert(msg);
+                    return;
+                }
+                document.getElementById('bookBtn').disabled = true;
+                alert('Prenotazione registrata!');
+                window.location.href = 'MenteeDashBoard.html?booked=1';
+            } catch (e) {
+                console.error(e);
+                alert('Impossibile prenotare la sessione');
+            }
         });
     </script>
 

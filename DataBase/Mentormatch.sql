@@ -73,9 +73,7 @@ CREATE TABLE google_meet_token(
 	access_token TEXT,
 	refresh_token TEXT,
 	scope TEXT,
-	token_type TEXT,
 	expiry_date TEXT,
 	singleton BOOLEAN GENERATED ALWAYS AS (TRUE) STORED,
     CONSTRAINT only_one_row UNIQUE (singleton)
 );
-

@@ -106,20 +106,7 @@
             <div class="col-lg-6">
                 <div class="box-card">
                     <h4 class="fw-bold mb-3">Notifiche</h4>
-
-                    <div class="notif-box mb-3">
-                        <p class="fw-semibold mb-1">Nuova prenotazione ricevuta.</p>
-                        <p class="small text-muted">Studente: Marco Bianchi — Domani alle 16:00</p>
-                    </div>
-
-                    <div class="notif-box mb-3">
-                        <p class="fw-semibold mb-1">Modifica di agenda confermata.</p>
-                        <p class="small text-muted">La tua disponibilità di venerdì è stata aggiornata.</p>
-                    </div>
-
-                    <div class="notif-box">
-                        <p class="fw-semibold mb-1">Promemoria: lascia feedback agli ultimi 2 mentee.</p>
-                    </div>
+                    <div id="notificationsContainer"></div>
 
                 </div>
             </div>
@@ -144,6 +131,66 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- MODALE: Aggiungi Disponibilità -->
+    <div class="modal fade" id="availabilityModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Aggiungi disponibilità</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <strong>Data:</strong> <span id="availabilityDate">—</span>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="availType" id="availFullDay" checked>
+                        <label class="form-check-label" for="availFullDay">Tutta la giornata (09:00–18:00)</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="availType" id="availRange">
+                        <label class="form-check-label" for="availRange">Intervallo orario</label>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col">
+                            <label class="form-label">Dalle</label>
+                            <input id="availStart" class="form-control" type="time" value="09:00" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Alle</label>
+                            <input id="availEnd" class="form-control" type="time" value="18:00" disabled>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" id="saveAvailabilityBtn" class="btn btn-primary">Salva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE: Rimuovi Disponibilità -->
+    <div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rimuovi disponibilità</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2"><strong>Data:</strong> <span id="delAvailabilityDate">—</span></p>
+                    <p class="mb-3"><strong>Orario:</strong> <span id="delAvailabilityTime">—</span></p>
+                    <p>Sei sicuro di voler rimuovere questa disponibilità?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" id="confirmDeleteAvailabilityBtn" class="btn btn-danger">Rimuovi</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -180,16 +227,35 @@
                 document.getElementById('calendar-small'),
                 {
                     initialView: isMobile ? 'dayGridWeek' : 'dayGridMonth',
-                    height: isMobile ? 280 : 320,
+                    height: isMobile ? 400 : 550,
 
                     headerToolbar: isMobile
                     ? { left: 'prev,next', center: 'title', right: '' }
                     : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
 
-                    events: [
-                        { title: 'Sessione — Luca', start: '2025-02-12T14:00', color: '#4a90e2' },
-                        { title: 'Sessione — Ana', start: '2025-02-14T10:00', color: '#16a085' }
-                    ]
+                    events: async function(fetchInfo, successCallback, failureCallback) {
+                        try {
+                            const token = localStorage.getItem('token');
+                            if (!token) { successCallback([]); return; }
+                            const res = await fetch('http://localhost:3000/api/session/get_sessions', {
+                                headers: { 'Authorization': `Bearer ${token}` },
+                                cache: 'no-store'
+                            });
+                            if (!res.ok) { successCallback([]); return; }
+                            const sessions = await res.json();
+                            const events = (Array.isArray(sessions) ? sessions : (sessions?.data || [])).map(s => ({
+                                id: s.id,
+                                title: s.status === 'confirmed' ? 'Sessione confermata' : 'Sessione prenotata',
+                                start: s.start_datetime,
+                                end: s.end_datetime,
+                                color: s.status === 'confirmed' ? '#4a90e2' : '#16a085'
+                            }));
+                            successCallback(events);
+                        } catch (err) {
+                            console.error('Errore nel caricamento delle sessioni', err);
+                            failureCallback(err);
+                        }
+                    }
                 }
             );
 
@@ -206,15 +272,236 @@
                     ? { left: 'prev,next', center: 'title', right: '' }
                     : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
 
-                    events: [
-                        { title: 'Disponibile', start: '2025-02-13T09:00', end: '2025-02-13T12:00', color: '#d1ecf1' },
-                        { title: 'Sessione — Mario', start: '2025-02-15T14:00', end: '2025-02-15T15:00', color: '#007bff' }
-                    ]
+                    eventSources: [
+                        // Sessions source
+                        {
+                            events: async function(fetchInfo, successCallback, failureCallback) {
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    if (!token) { successCallback([]); return; }
+                                    const res = await fetch('http://localhost:3000/api/session/get_sessions', {
+                                        headers: { 'Authorization': `Bearer ${token}` },
+                                        cache: 'no-store'
+                                    });
+                                    if (!res.ok) { successCallback([]); return; }
+                                    const sessions = await res.json();
+                                    const events = (Array.isArray(sessions) ? sessions : (sessions?.data || [])).map(s => ({
+                                        id: s.id,
+                                        title: s.status === 'confirmed' ? 'Sessione confermata' : 'Sessione prenotata',
+                                        start: s.start_datetime,
+                                        end: s.end_datetime,
+                                        color: s.status === 'confirmed' ? '#007bff' : '#4a90e2'
+                                    }));
+                                    successCallback(events);
+                                } catch (err) {
+                                    console.error('Errore nel caricamento delle sessioni', err);
+                                    failureCallback(err);
+                                }
+                            }
+                        },
+                        // Availabilities source
+                        {
+                            events: async function(fetchInfo, successCallback, failureCallback) {
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    if (!token) { successCallback([]); return; }
+                                    const res = await fetch('http://localhost:3000/api/mentor_availability/get_availabilities', {
+                                        headers: { 'Authorization': `Bearer ${token}` },
+                                        cache: 'no-store'
+                                    });
+                                    if (!res.ok) { successCallback([]); return; }
+                                    const data = await res.json();
+                                    const rows = data?.data || [];
+                                    const events = rows.map(r => {
+                                        const dateStr = (typeof r.weekday === 'string') ? r.weekday.slice(0, 10) : new Date(r.weekday).toISOString().slice(0, 10);
+                                        const s = String(r.start_time).slice(0,5);
+                                        const e = String(r.end_time).slice(0,5);
+                                        return {
+                                            title: 'Disponibile',
+                                            start: `${dateStr}T${s}`,
+                                            end: `${dateStr}T${e}`,
+                                            color: '#d1ecf1',
+                                            extendedProps: { availabilityId: r.id }
+                                        };
+                                    });
+                                    successCallback(events);
+                                } catch (err) {
+                                    console.error('Errore nel caricamento delle disponibilità', err);
+                                    failureCallback(err);
+                                }
+                            }
+                        }
+                    ],
+                    dateClick(info) {
+                        const role = localStorage.getItem('role');
+                        if (role !== 'mentor') return;
+                        const dateStr = info.dateStr.slice(0, 10); // YYYY-MM-DD
+                        document.getElementById('availabilityDate').textContent = dateStr;
+                        const modal = new bootstrap.Modal(document.getElementById('availabilityModal'));
+                        modal.show();
+
+                        const start = document.getElementById('availStart');
+                        const end = document.getElementById('availEnd');
+                        const full = document.getElementById('availFullDay');
+                        const range = document.getElementById('availRange');
+                        const token = localStorage.getItem('token');
+
+                        function updateInputs() {
+                            const useRange = range.checked;
+                            start.disabled = !useRange;
+                            end.disabled = !useRange;
+                        }
+                        full.addEventListener('change', updateInputs);
+                        range.addEventListener('change', updateInputs);
+                        updateInputs();
+
+                        document.getElementById('saveAvailabilityBtn').onclick = async () => {
+                            try {
+                                if (full.checked) {
+                                    // One full-day block: 09:00–18:00
+                                    const s = '09:00';
+                                    const e = '18:00';
+                                    const res = await fetch('http://localhost:3000/api/mentor_availability/add_availability', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${token}`
+                                        },
+                                        body: JSON.stringify({ date: dateStr, start_time: s, end_time: e })
+                                    });
+                                    const data = await res.json().catch(() => ({}));
+                                    if (!res.ok) {
+                                        const msg = data?.message || 'Errore nel salvataggio';
+                                        alert(msg);
+                                        return;
+                                    }
+                                    bigCal.addEvent({ title: 'Disponibile', start: `${dateStr}T${s}`, end: `${dateStr}T${e}`, color: '#d1ecf1', extendedProps: { availabilityId: data?.data?.id || null } });
+                                    modal.hide();
+                                } else {
+                                    const s = start.value || '09:00';
+                                    const e = end.value || '18:00';
+                                    const res = await fetch('http://localhost:3000/api/mentor_availability/add_availability', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${token}`
+                                        },
+                                        body: JSON.stringify({ date: dateStr, start_time: s, end_time: e })
+                                    });
+                                    const data = await res.json().catch(() => ({}));
+                                    if (!res.ok) {
+                                        const msg = data?.message || 'Errore nel salvataggio';
+                                        alert(msg);
+                                        return;
+                                    }
+                                    bigCal.addEvent({ title: 'Disponibile', start: `${dateStr}T${s}`, end: `${dateStr}T${e}`, color: '#d1ecf1', extendedProps: { availabilityId: data?.data?.id || null } });
+                                    modal.hide();
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert('Impossibile salvare la disponibilità');
+                            }
+                        };
+                    },
+                    eventClick(info) {
+                        const role = localStorage.getItem('role');
+                        if (role !== 'mentor') return;
+                        const availabilityId = info.event.extendedProps?.availabilityId;
+                        if (!availabilityId) return; // ignora eventi non di disponibilità
+                        const start = info.event.start;
+                        const end = info.event.end;
+                        const dateStr = start?.toISOString().slice(0,10);
+                        const s = start ? start.toTimeString().slice(0,5) : '—';
+                        const e = end ? end.toTimeString().slice(0,5) : '—';
+
+                        document.getElementById('delAvailabilityDate').textContent = dateStr || '—';
+                        document.getElementById('delAvailabilityTime').textContent = `${s} - ${e}`;
+
+                        const modal = new bootstrap.Modal(document.getElementById('deleteAvailabilityModal'));
+                        modal.show();
+
+                        const token = localStorage.getItem('token');
+                        const btn = document.getElementById('confirmDeleteAvailabilityBtn');
+                        btn.onclick = () => {
+                            fetch(`http://localhost:3000/api/mentor_availability/remove_availability/${availabilityId}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            })
+                            .then(res => res.json().catch(() => ({})))
+                            .then(j => {
+                                if (j?.success) {
+                                    info.event.remove();
+                                    modal.hide();
+                                } else {
+                                    alert(j?.message || 'Impossibile rimuovere la disponibilità');
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                alert('Errore durante la rimozione');
+                            });
+                        };
+                    }
                 }
             );
 
             smallCal.render();
             bigCal.render();
+
+            // Auto-refresh events when tab regains focus and on a short interval
+            function refetchAll() {
+                try { smallCal.refetchEvents(); } catch {}
+                try { bigCal.refetchEvents(); } catch {}
+            }
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) refetchAll();
+            });
+            setInterval(refetchAll, 30000);
+
+            // Availabilities are now loaded via eventSources and auto-refreshed
+        });
+    </script>
+
+    <!-- NOTIFICHE SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const container = document.getElementById('notificationsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            async function loadNotifications() {
+                container.innerHTML = '';
+                try {
+                    if (!token) return;
+                    const res = await fetch('http://localhost:3000/api/notification/fetch_notifications', {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        cache: 'no-store'
+                    });
+                    const json = await res.json().catch(() => ({}));
+                    const list = json?.data?.notifications || [];
+                    if (!Array.isArray(list) || list.length === 0) {
+                        const empty = document.createElement('div');
+                        empty.className = 'notif-box';
+                        empty.innerHTML = '<p class="small text-muted mb-0">Nessuna notifica al momento.</p>';
+                        container.appendChild(empty);
+                        return;
+                    }
+                    list.forEach(n => {
+                        const box = document.createElement('div');
+                        box.className = 'notif-box mb-3';
+                        const msg = n?.message || '';
+                        box.innerHTML = `<p class=\"mb-0\">${msg}</p>`;
+                        container.appendChild(box);
+                    });
+                } catch (err) {
+                    console.error('Errore caricando notifiche', err);
+                }
+            }
+            await loadNotifications();
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) loadNotifications();
+            });
+            setInterval(loadNotifications, 30000);
         });
     </script>
 

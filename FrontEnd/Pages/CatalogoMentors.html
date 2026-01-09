@@ -84,23 +84,64 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Settore</label>
-                    <select class="form-select">
-                        <option>Tutti</option>
-                        <option>Programmazione</option>
-                        <option>Design</option>
-                        <option>Marketing</option>
-                        <option>Business</option>
-                    </select>
+                    <div class="dropdown w-100">
+                        <button id="sectorDropdownToggle" class="form-select text-start" type="button">Tutti</button>
+                        <div id="sectorDropdownMenu" class="dropdown-menu p-3 w-100" style="max-height:220px; overflow:auto;">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sectorAll" value="Tutti" checked>
+                                <label class="form-check-label" for="sectorAll">Tutti</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sectorProg" value="Programmazione">
+                                <label class="form-check-label" for="sectorProg">Programmazione</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sectorDesign" value="Design">
+                                <label class="form-check-label" for="sectorDesign">Design</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sectorMarketing" value="Marketing">
+                                <label class="form-check-label" for="sectorMarketing">Marketing</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sectorBusiness" value="Business">
+                                <label class="form-check-label" for="sectorBusiness">Business</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sectorDS" value="Data Science">
+                                <label class="form-check-label" for="sectorDS">Data Science</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sectorAI" value="AI / Machine Learning">
+                                <label class="form-check-label" for="sectorAI">AI / Machine Learning</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Lingua</label>
-                    <select class="form-select">
-                        <option>Tutte</option>
-                        <option>Italiano</option>
-                        <option>Inglese</option>
-                        <option>Spagnolo</option>
-                    </select>
+                    <div class="dropdown w-100">
+                        <button id="langDropdownToggle" class="form-select text-start" type="button">Tutte</button>
+                        <div id="langDropdownMenu" class="dropdown-menu p-3 w-100" style="max-height:220px; overflow:auto;">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="langAll" value="Tutte" checked>
+                                <label class="form-check-label" for="langAll">Tutte</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="langIt" value="Italiano">
+                                <label class="form-check-label" for="langIt">Italiano</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="langEn" value="Inglese">
+                                <label class="form-check-label" for="langEn">Inglese</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="langEs" value="Spagnolo">
+                                <label class="form-check-label" for="langEs">Spagnolo</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-md-4">

@@ -1,5 +1,5 @@
 const add_availability_dto = {
-    weekday: { 
+    date: { 
         required: true,
         type: 'date',
         pattern: /^\d{4}-\d{2}-\d{2}$/, //DATE (YYYY-MM-DD)

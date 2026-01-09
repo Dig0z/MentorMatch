@@ -77,8 +77,20 @@ async function get_mentors(name, surname, email, availability_day, sector, last_
     let index = 0;
     const values = [];
     let query = `
-        SELECT u.name, u.surname, u.email, u.bio, u.photo_url, ma.weekday, ma.start_time, ma.end_time, ms.sector_name 
-        FROM users u left join mentor_availability ma on u.id = ma.mentor_id left join mentor_sectors ms on u.id = ms.mentor_id
+        SELECT u.name, u.surname, u.email, u.bio, u.photo_url,
+               ma.weekday, ma.start_time, ma.end_time,
+               ms.sector_name,
+               ul.language_name,
+               r.avg_rating
+        FROM users u
+        LEFT JOIN mentor_availability ma ON u.id = ma.mentor_id
+        LEFT JOIN mentor_sectors ms ON u.id = ms.mentor_id
+        LEFT JOIN user_languages ul ON u.id = ul.user_id
+        LEFT JOIN (
+            SELECT mentor_id, ROUND(AVG(rating)::numeric, 1) AS avg_rating
+            FROM reviews
+            GROUP BY mentor_id
+        ) r ON u.id = r.mentor_id
         WHERE u.role = 'mentor'
     `;
     

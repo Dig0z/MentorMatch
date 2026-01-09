@@ -76,6 +76,10 @@
 
         <h2 class="fw-bold mb-4">Dashboard Mentee</h2>
 
+        <div id="bookedAlert" class="alert alert-success d-none" role="alert">
+            Prenotazione registrata!
+        </div>
+
         <!-- CALENDARIO -->
         <div class="card p-4 shadow-sm mb-5">
             <h4 class="fw-bold mb-3">Il Tuo Calendario</h4>
@@ -128,46 +132,52 @@
 
     <!-- FULLCALENDAR SCRIPT -->
     <script>
+        const API_BASE = 'http://localhost:3000';
+        const token = localStorage.getItem('token');
+        // Show success alert if redirected after booking
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('booked') === '1') {
+                const el = document.getElementById('bookedAlert');
+                if (el) el.classList.remove('d-none');
+                // Clean query param after showing
+                const url = new URL(window.location.href);
+                url.searchParams.delete('booked');
+                window.history.replaceState({}, '', url.pathname);
+            }
+        })();
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
             const isMobile = window.innerWidth < 576;
-
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: isMobile ? 'dayGridWeek' : 'dayGridMonth',
                 height: isMobile ? 400 : 650,
-
                 headerToolbar: isMobile
-                    ? {
-                        left: 'prev,next',
-                        center: 'title',
-                        right: ''
+                    ? { left: 'prev,next', center: 'title', right: '' }
+                    : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+                eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+                events: async function(fetchInfo, successCallback, failureCallback) {
+                    try {
+                        if (!token) { successCallback([]); return; }
+                        const res = await fetch(`${API_BASE}/api/session/get_sessions`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!res.ok) { successCallback([]); return; }
+                        const sessions = await res.json();
+                        const arr = Array.isArray(sessions) ? sessions : (sessions?.data || []);
+                        const events = arr.map(s => ({
+                            id: s.id,
+                            title: s.status === 'confirmed' ? 'Sessione confermata' : 'Sessione prenotata',
+                            start: s.start_datetime,
+                            end: s.end_datetime,
+                        }));
+                        successCallback(events);
+                    } catch (err) {
+                        console.error('Errore nel caricamento delle sessioni', err);
+                        failureCallback(err);
                     }
-                    : {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    },
-
-                events: [
-                    {
-                        title: 'Sessione con Giovanni',
-                        start: '2025-02-12T14:00',
-                        color: '#4a90e2'
-                    },
-                    {
-                        title: 'Sessione con Elena',
-                        start: '2025-02-14T10:00',
-                        color: '#16a085'
-                    },
-                    {
-                        title: 'Sessione passata: Sara',
-                        start: '2025-02-05T15:00',
-                        color: '#999999',
-                        textColor: 'white'
-                    }
-                ]
+                }
             });
-
             calendar.render();
         });
     </script>

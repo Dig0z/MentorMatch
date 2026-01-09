@@ -83,6 +83,25 @@
                             <div id="emailField" class="form-control bg-light">{{EMAIL}}</div>
                         </div>
 
+                        <!-- LINGUE (CHECKBOXES) - visibile per tutti -->
+                        <div class="col-md-12" id="languagesSection">
+                            <label class="form-label">Lingue parlate</label>
+                            <div class="sector-box">
+                                <div class="form-check">
+                                    <input class="form-check-input lang-checkbox" type="checkbox" value="Italiano" id="lang1" disabled>
+                                    <label class="form-check-label" for="lang1">Italiano</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input lang-checkbox" type="checkbox" value="Inglese" id="lang2" disabled>
+                                    <label class="form-check-label" for="lang2">Inglese</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input lang-checkbox" type="checkbox" value="Spagnolo" id="lang3" disabled>
+                                    <label class="form-check-label" for="lang3">Spagnolo</label>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- SECTOR (CHECKBOXES) -->
                         <div class="col-md-12" id="sectorSection">
                             <label class="form-label">Settori di competenza</label>
@@ -210,11 +229,14 @@
                 if (role === 'mentor') {
                     loadSectors(token);
                 }
+                // Precarica lingue per tutti
+                loadLanguages(token);
             })
             .catch(err => console.error('Load profile failed', err));
         });
 
         let initialSectors = new Set();
+        let initialLanguages = new Set();
 
         async function loadSectors(token) {
             try {
@@ -232,8 +254,31 @@
             }
         }
 
+        async function loadLanguages(token) {
+            try {
+                const res = await fetch('http://localhost:3000/api/user_language/get_languages', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                const langs = data?.data?.languages || [];
+                initialLanguages = new Set(langs.map(l => l.language_name));
+                document.querySelectorAll('.lang-checkbox').forEach(chk => {
+                    chk.checked = initialLanguages.has(chk.value);
+                });
+            } catch (e) {
+                console.error('Load languages failed', e);
+            }
+        }
+
         function setSectorInputsDisabled(disabled) {
             document.querySelectorAll('.sector-checkbox').forEach(chk => {
+                if (disabled) chk.setAttribute('disabled', '');
+                else chk.removeAttribute('disabled');
+            });
+        }
+
+        function setLangInputsDisabled(disabled) {
+            document.querySelectorAll('.lang-checkbox').forEach(chk => {
                 if (disabled) chk.setAttribute('disabled', '');
                 else chk.removeAttribute('disabled');
             });
@@ -242,6 +287,12 @@
         function getSelectedSectors() {
             const list = [];
             document.querySelectorAll('.sector-checkbox:checked').forEach(chk => list.push(chk.value));
+            return new Set(list);
+        }
+
+        function getSelectedLanguages() {
+            const list = [];
+            document.querySelectorAll('.lang-checkbox:checked').forEach(chk => list.push(chk.value));
             return new Set(list);
         }
 
@@ -265,6 +316,7 @@
                 bioEl.focus();
                 btn.textContent = 'Salva';
                 if (role === 'mentor') setSectorInputsDisabled(false);
+                setLangInputsDisabled(false);
                 return;
             }
 
@@ -317,8 +369,40 @@
                     }
                 }
 
+                // Sync languages (para todos)
+                {
+                    const currentL = getSelectedLanguages();
+                    const toAddL = [...currentL].filter(x => !initialLanguages.has(x));
+                    const toRemoveL = [...initialLanguages].filter(x => !currentL.has(x));
+
+                    const addCallsL = toAddL.map(name => fetch('http://localhost:3000/api/user_language/add_language', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ language_name: name })
+                    }));
+                    const removeCallsL = toRemoveL.map(name => fetch('http://localhost:3000/api/user_language/remove_language', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ language_name: name })
+                    }));
+                    const responsesL = await Promise.all([...addCallsL, ...removeCallsL]);
+                    const allOkL = responsesL.every(r => r.ok);
+                    if (!allOkL) {
+                        alert('Alcune lingue non sono state salvate');
+                    } else {
+                        initialLanguages = currentL;
+                    }
+                }
+
                 bioEl.setAttribute('disabled', '');
                 setSectorInputsDisabled(true);
+                setLangInputsDisabled(true);
                 btn.textContent = 'Modifica';
                 alert('Profilo salvato');
             } catch (e) {

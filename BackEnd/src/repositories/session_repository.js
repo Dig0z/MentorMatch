@@ -67,7 +67,19 @@ async function get_user_sessions(user_id) {
         WHERE (mentor_id = $1 OR mentee_id = $1)
     `;
     const result = await pool.query(query, [user_id]);
-    console.log(result.rows);
+    return result.rows;
+}
+
+async function find_overlaps_for_mentor(mentor_id, start_datetime, end_datetime) {
+    const query = `
+        SELECT id, start_datetime, end_datetime, status
+        FROM sessions
+        WHERE mentor_id = $1
+        AND status IN ('pending','confirmed')
+        AND start_datetime < $3
+        AND end_datetime > $2
+    `;
+    const result = await pool.query(query, [mentor_id, start_datetime, end_datetime]);
     return result.rows;
 }
 
@@ -77,5 +89,6 @@ module.exports = {
     add_meeting_link,
     delete_session,
     get_session,
-    get_user_sessions
+    get_user_sessions,
+    find_overlaps_for_mentor
 };

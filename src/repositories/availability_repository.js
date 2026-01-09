@@ -12,14 +12,14 @@ async function add_availability(mentor_id, weekday, start_time, end_time) {
     return result.rows[0];
 };
 
-async function check_availability(mentor_id, weekday) {
+async function check_availability(mentor_id, dateStr) {
     const query = `
         SELECT id, weekday, start_time, end_time
         FROM mentor_availability
         WHERE mentor_id = $1
-        AND weekday = $2
+        AND weekday = $2::date
     `;
-    const availabilities = await pool.query(query, [mentor_id, weekday]);
+    const availabilities = await pool.query(query, [mentor_id, dateStr]);
     return availabilities.rows;
 }
 
@@ -56,15 +56,16 @@ async function remove_all(mentor_id) {
     return dates.rows;
 }
 
-async function get_availability(weekday, start_time, end_time) {
+async function get_availability(mentor_id, dateStr, start_time, end_time) {
     const query = `
         SELECT id
         FROM mentor_availability
-        WHERE weekday = $1
-        AND start_time = $2
-        AND end_time = $3 
+        WHERE mentor_id = $1
+        AND weekday = $2::date
+        AND start_time <= $3::time
+        AND end_time >= $4::time
     `;
-    const availability = await pool.query(query, [weekday, start_time, end_time]); 
+    const availability = await pool.query(query, [mentor_id, dateStr, start_time, end_time]); 
     return availability.rows[0];
 }
 

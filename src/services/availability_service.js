@@ -1,14 +1,14 @@
 const availability_repository = require('../repositories/availability_repository');
 
 async function add_availability(mentor_id, payload) {
-    const {weekday, start_time, end_time} = payload;
-    const dates = await availability_repository.check_availability(mentor_id, weekday);
+    const {date, start_time, end_time} = payload;
+    const dates = await availability_repository.check_availability(mentor_id, date);
     if(dates && check_date(dates, start_time)) {
         const err = new Error('Please do not overlap availabilities');
         err.status = 409;
         throw err;
     }
-    const result = await availability_repository.add_availability(mentor_id, weekday, start_time, end_time);
+    const result = await availability_repository.add_availability(mentor_id, date, start_time, end_time);
     if(!result) {
         const err = new Error('Failed to add availability');
         err.status = 500;
@@ -48,8 +48,8 @@ async function remove_all(mentor_id) {
     return dates; 
 }
 
-async function get_availability(weekday, start_time, end_time) {
-    const availability = await availability_repository.get_availability(weekday, start_time, end_time);
+async function get_availability(mentor_id, date, start_time, end_time) {
+    const availability = await availability_repository.get_availability(mentor_id, date, start_time, end_time);
     if(!availability) {
         const err = new Error('Selected time is not available');
         err.status = 404;

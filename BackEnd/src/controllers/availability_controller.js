@@ -32,6 +32,20 @@ router.get('/get_availabilities', auth, async (req, res) => {
     });
 });
 
+// Public fetch by mentor email (requires auth but not mentor role)
+router.get('/get_availabilities_by_email', auth, async (req, res) => {
+    const email = req.query.email;
+    if (!email) {
+        return res.status(400).json({ success: false, error: 'email query param is required' });
+    }
+    const dates = await availability_service.get_availabilities_by_email(email);
+    res.status(200).json({
+        message: `Found ${dates.length} availability blocks`,
+        success: true,
+        data: dates
+    });
+});
+
 router.delete('/remove_availability/:id', validate(remove_availability_dto, 'params'), auth, async (req, res) => {
     const mentor_id = req.user.id;
     const date = await availability_service.remove_availability(req.params, mentor_id);
