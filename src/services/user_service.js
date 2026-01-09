@@ -1,5 +1,6 @@
 const user_repository = require('../repositories/user_repository.js');
 const {send_notification} = require('./notification_service.js');
+const {sendEmail} = require('./google_auth_service.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -11,15 +12,22 @@ async function register(user_data) {
     const password_hash = await bcrypt.hash(password, saltRounds);
     const user = await user_repository.register_user(name, surname, email, password_hash, role, bio, photo_url);
     const {id} = user;
-    console.log('User created. user id = ', id);
     const token = jwt.sign(
         {id: id},
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     );
     console.log(`Registration completed`);
-    const message = 'Hello and welcome to your new account!\nStart exploring MentorMatch and find the best opportunity for you!'
+    const message = `
+        Hello and welcome to your new account!\n
+        Start exploring MentorMatch and find the best opportunity for you!
+    `;
     await send_notification(id, message);
+    await sendEmail({
+        to: email,
+        subject: 'Registration completed',
+        html: message
+    });
     return {user, token};
 }
 

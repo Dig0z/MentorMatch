@@ -1,4 +1,4 @@
-const availability_repository = require('../repositories/availability_repository');
+const availability_repository = require('../repositories/availability_repository.js');
 
 async function add_availability(mentor_id, payload) {
     const {weekday, start_time, end_time} = payload;
