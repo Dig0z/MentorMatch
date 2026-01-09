@@ -2,10 +2,9 @@
   "name": "mentormatch",
   "version": "1.0.0",
   "description": "A mentoring platform connecting mentors and mentees",
-  "main": "src/app.js",
   "scripts": {
-    "start": "node src/bootstrap.js",
-    "dev": "node src/bootstrap.js",
+    "start": "node src/app.js",
+    "dev": "node src/app.js",
     "test": "jest"
   },
   "dependencies": {
