@@ -1,58 +1,128 @@
-File ReadME per il DB:
+# MentorMatch
 
-Questo DB è composto da 5 tabelle principali, atte a gestire il corretto funzionamento del programma:
-1) users: Contiene tutte le informazioni relative a mentor, mentee e admins.
-Contiene tutte le informazioni relative a mentor, mentee e utenti amministrativi.
+A mentoring platform connecting mentors and mentees with session booking, availability management, and integrated video meetings.
 
-id – identificatore univoco.
-name, surname – dati anagrafici.
-email – univoca per ogni utente.
-password_hash – hash della password.
-role – tipo utente (mentor, mentee, admin).
-bio, photo_url – informazioni di profilo.
-created_at – timestamp di creazione dell’account.
+## Project Structure
 
-2) mentor_sectors: Associa ogni mentor ai settori professionali di cui si occupa.
+```
+MentorMatch/
+├── src/                 # Backend (Node.js + Express)
+│   ├── controllers/     # HTTP request handlers
+│   ├── services/        # Business logic
+│   ├── repositories/    # Database access layer
+│   ├── middlewares/     # Auth, validation, error handling
+│   ├── dtos/           # Data Transfer Objects
+│   ├── config/         # Configuration (DB, etc.)
+│   └── utils/          # Utility functions
+├── public/             # Frontend (HTML/CSS/JS)
+│   ├── Pages/          # HTML pages
+│   ├── JS/             # JavaScript modules
+│   ├── CSS/            # Stylesheets
+│   └── Components/     # Reusable components
+├── database/           # PostgreSQL schema and migrations
+├── test/               # Test files
+└── package.json        # Dependencies and scripts
+```
 
-mentor_id – riferimento alla tabella users.
-sector_name – nome del settore (es. "Software Development").
-**La chiave primaria è composta da (mentor_id, sector_name).
+## Quick Start
 
-3) mentor_availability: Definisce le disponibilità settimanali dei mentor.
+### Prerequisites
+- Node.js (v14+)
+- PostgreSQL
+- npm
 
-mentor_id – riferimento alla tabella users.
-weekday – giorno della settimana (1–7).
-start_time, end_time – intervallo orario.
+### Installation
 
-4) sessions: Rappresenta le sessioni di mentoring prenotate tra un mentor e un mentee.
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd MentorMatch
+```
 
-mentor_id – riferimento al mentor.
-mentee_id – riferimento al mentee.
-start_datetime, end_datetime – orario della sessione.
-status – stato della sessione (pending, confirmed, completed, cancelled).
-meeting_link – link alla videochiamata.
+2. Install dependencies:
+```bash
+npm install
+```
 
-5) reviews: Contiene le recensioni dei mentee verso i mentor
+3. Set up environment variables:
+Create a `.env` file in the root directory with:
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mentormatch
+DB_USER=your_username
+DB_PASSWORD=your_password
+JWT_SECRET=your_secret_key
+PORT=3000
+```
 
-mentor_id, mentee_id – riferimenti alla tabella users.
-rating – voto (1–5).
-comment – testo della recensione.
-created_at – timestamp.
+4. Set up the database:
+- Open pgAdmin 4
+- Create a new database named `mentormatch`
+- Run the SQL script from `database/Mentormatch.sql`
+- Apply migrations from `database/migrations/`
 
-# Come importare il database tramite pgAdmin:
+5. Start the application:
+```bash
+npm start
+```
 
-1.Aprire pgAdmin 4.
-2.Nel menu a sinistra, espandere Servers e selezionare il tuo server locale.
-3.Clic destro su Databases → Create → Database…
-4.Inserire il nome: mentormatch
-5.Cliccare save.
+The server will start on `http://localhost:3000` and serve both the API and frontend.
 
-6.Selezionare il database mentormatch.
-7.In alto, cliccare su Query Tool.
-8.Si aprirà un editor SQL.
+## Features
 
-9.Aprire il file e copiare i contenuti di schema_mentormatch.sql
-10.Incollare il testo nel Query Tool di pgAdmin.
-11.Premere il pulsante Execute.
+- User authentication with JWT
+- Role-based access (Mentor/Mentee/Admin)
+- Mentor availability management
+- Session booking system
+- Google Meet integration
+- Notification system
+- Review and rating system
 
-Se tutto ha funzionato correttamente in mentormatch -> Schemas -> public -> Tables si dovrebbero vedere le 5 tabelle create.
+## Tech Stack
+
+**Backend:**
+- Node.js + Express
+- PostgreSQL
+- JWT authentication
+- bcrypt for password hashing
+
+**Frontend:**
+- Vanilla JavaScript (ES6 modules)
+- HTML5 + CSS3
+- Bootstrap 5
+
+## API Endpoints
+
+All API endpoints are prefixed with `/api`:
+- `/api/user` - User management
+- `/api/session` - Session booking
+- `/api/notification` - Notifications
+- `/api/mentor_sector` - Mentor sectors
+- `/api/mentor_availability` - Availability management
+- `/api/google_auth` - Google OAuth
+- `/api/user_language` - User languages
+
+For detailed backend documentation, see [Backend.md](Backend.md)
+
+## Database Schema
+
+The database consists of 7 main tables:
+- **users** - User accounts (mentors, mentees, admins)
+- **mentor_sectors** - Mentor professional sectors
+- **mentor_availability** - Mentor scheduling
+- **sessions** - Mentoring sessions
+- **reviews** - Mentee reviews
+- **notifications** - User notifications
+- **google_meet_token** - OAuth tokens
+
+## Testing
+
+Run tests with:
+```bash
+npm test
+```
+
+## License
+
+[Add your license here]
