@@ -51,7 +51,7 @@ async function delete_session(id, user_id) {
 
 async function get_session(id, user_id) {
     const query = `
-        SELECT id, start_datetime, end_datetime, status, meeting_link
+        SELECT id, mentor_id, mentee_id, start_datetime, end_datetime, status, meeting_link
         FROM sessions
         WHERE id = $1
         AND (mentor_id = $2 OR mentee_id = $2)

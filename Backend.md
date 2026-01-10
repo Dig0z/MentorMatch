@@ -29,7 +29,7 @@ npm start
 
 ## Architecture
 
-The backend follows a 3-layer architecture pattern:
+The backend follows a **4-layer architecture pattern**:
 
 ### Controllers (`src/controllers/`)
 - Handle HTTP requests and define API endpoints
@@ -51,6 +51,12 @@ The backend follows a 3-layer architecture pattern:
 - Provide abstraction layer for data persistence
 - Enable easy database changes without impacting services
 
+### DTOs (`src/dtos/`)
+- Data Transfer Objects for request validation
+- Apply syntactic and format checks to client input
+- A dedicated middleware verifies that checks are met
+- Logical validation is performed by services
+
 This separation of concerns provides:
 - Better testability
 - Easier maintenance
@@ -65,15 +71,6 @@ This separation of concerns provides:
 - **exception_handler.js** - Central error handling
 - **async_handler.js** - Async route wrapper
 
-### DTOs (`src/dtos/`)
-Data Transfer Objects for request validation:
-- `user/` - User-related DTOs
-- `session/` - Session DTOs
-- `mentor_availability/` - Availability DTOs
-- `mentor_sector/` - Sector DTOs
-- `notifications/` - Notification DTOs
-- `user_languages/` - Language DTOs
-
 ### Configuration (`src/config/`)
 - **db.js** - Database connection pool
 - Environment variable configuration
@@ -81,6 +78,11 @@ Data Transfer Objects for request validation:
 ### Utils (`src/utils/`)
 - **time.js** - Time manipulation utilities
 - **date.js** - Date handling utilities
+
+### Core Files
+- **bootstrap.js** - Server initialization function (app.listen), separated to asynchronously load Google token
+- **routes.js** - Maps API paths to controller modules and endpoints
+- **app.js** - Server startup module, contains main library definitions and loading
 
 ## Project Structure
 
@@ -94,6 +96,7 @@ src/
 │   ├── availability_controller.js
 │   ├── google_auth_controller.js
 │   ├── user_language_controller.js
+│   ├── review_controller.js
 │   └── index.js
 ├── services/                 # Business logic
 │   ├── user_service.js
@@ -102,7 +105,8 @@ src/
 │   ├── mentor_sector_service.js
 │   ├── availability_service.js
 │   ├── google_auth_service.js
-│   └── user_language_service.js
+│   ├── user_language_service.js
+│   └── review_service.js
 ├── repositories/             # Data access layer
 │   ├── user_repository.js
 │   ├── session_repository.js
@@ -110,13 +114,21 @@ src/
 │   ├── mentor_sector_repository.js
 │   ├── availability_repository.js
 │   ├── google_auth_repository.js
-│   └── user_language_repository.js
+│   ├── user_language_repository.js
+│   └── review_repository.js
 ├── middlewares/              # Request processing
 │   ├── auth_middleware.js
 │   ├── dto_middleware.js
 │   ├── exception_handler.js
 │   └── async_handler.js
 ├── dtos/                     # Validation schemas
+│   ├── user/
+│   ├── session/
+│   ├── mentor_availability/
+│   ├── mentor_sector/
+│   ├── notifications/
+│   ├── user_languages/
+│   └── review/
 ├── config/                   # Configuration
 │   └── db.js
 ├── utils/                    # Utilities
@@ -143,6 +155,9 @@ All routes are prefixed with `/api`:
 - `GET /api/mentor_availability` - Get availability
 - `POST /api/mentor_availability` - Set availability
 - `GET /api/google_auth` - Google OAuth flow
+- `POST /api/review` - Add review
+- `GET /api/review` - Get reviews
+- `DELETE /api/review/:id` - Delete review
 
 ## Error Handling
 

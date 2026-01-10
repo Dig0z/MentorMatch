@@ -156,6 +156,26 @@ async function get_public_data(user_id) {
     return result.rows[0];
 }
 
+async function get_role(user_id) {
+    const query = `
+        SELECT role
+        FROM users
+        WHERE id = $1
+    `;
+    const role = await pool.query(query, [user_id]);
+    return role.rows[0];
+}
+
+async function get_email_from_id(id) {
+    const query = `
+        SELECT email
+        FROM users
+        WHERE id = $1
+    `;
+    const email = await pool.query(query, [id]);
+    return email.rows[0];
+}
+
 module.exports = {
     get_users,
     register_user,
@@ -166,5 +186,7 @@ module.exports = {
     update_photo_url,
     get_mentors,
     get_id_from_email,
-    get_public_data
+    get_public_data,
+    get_email_from_id,
+    get_role
 };

@@ -15,7 +15,12 @@ router.post('/book_session', validate(book_session_dto), auth, asyncHandler(asyn
     res.status(201).json({
         message: `Session booked on ${start_datetime}`,
         success: true,
-        data: { id, start_datetime, end_datetime, status }
+        data: {
+            id,
+            start_datetime,
+            end_datetime,
+            status
+        }
     });
 }));
 
@@ -26,7 +31,13 @@ router.get('/confirm_booking/:id', validate(session_only_id_dto, 'params'), auth
     res.status(200).json({
         message: `Session confirmed on ${start_datetime}. Meeting link: ${meeting_link}`,
         success: true,
-        data: { id, start_datetime, end_datetime, status, meeting_link }
+        data: {
+            id,
+            start_datetime,
+            end_datetime,
+            status,
+            meeting_link
+        }
     });
 }));
 
@@ -37,7 +48,12 @@ router.patch('/cancel_session/:id', validate(session_only_id_dto, 'params'), aut
     res.status(200).json({
         message: 'Session cancelled',
         success: true,
-        data: { id, start_datetime, end_datetime, status }
+        data: {
+            id,
+            start_datetime,
+            end_datetime,
+            status
+        }
     });
 }));
 
@@ -48,7 +64,11 @@ router.delete('/confirm_cancellation/:id', validate(session_only_id_dto, 'params
     res.status(200).json({
         message: 'Session cancelled',
         success: true,
-        data: { start_datetime, end_datetime, status }
+        data: {
+            start_datetime,
+            end_datetime,
+            status
+        }
     });
 }));
 

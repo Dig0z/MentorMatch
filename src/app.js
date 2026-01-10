@@ -2,13 +2,20 @@ const path = require('path');
 require('dotenv').config({path: path.resolve(__dirname, '..', '.env')});
 const exception_handler = require('./middlewares/exception_handler.js');
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const bootstrap = require('./bootstrap.js');
-const cors = require('cors');
 
 require('./config/db.js');
 
-app.use(cors());
+//CORS configuration
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve static files from public directory

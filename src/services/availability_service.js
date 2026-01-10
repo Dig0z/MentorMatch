@@ -50,6 +50,7 @@ async function add_availability(mentor_id, payload) {
         err.status = 500;
         throw err;
     }
+    debugLog(`Added availability on ${date}, ${start_time} - ${end_time}`);
     return result;
 };
 
@@ -61,21 +62,24 @@ async function get_availabilities(mentor_id) {
 async function remove_availability(id_param, mentor_id) {
     const {id} = id_param;
     const date = availability_repository.remove_availability(id, mentor_id);
+    const {weekday, start_time, end_time} = date;
     if(!date) {
         const err = new Error('Availability not found');
         err.status = 404;
         throw err;
     }
+    debugLog(`Availability on ${weekday}, ${start_time} - ${end_time} removed`);
     return date;
 }
 
 async function remove_all(mentor_id) {
     const dates = availability_repository.remove_all(mentor_id);
-    if(!dates || dates.length == 0) {
+    if(!dates || dates.length === 0) {
         const err = new Error('No date found');
         err.status = 404;
         throw err;
     }
+    debugLog(`All dates removed`);
     return dates; 
 }
 

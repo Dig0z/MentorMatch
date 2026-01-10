@@ -1,4 +1,6 @@
 const user_repository = require('../repositories/user_repository.js');
+const {send_notification} = require('./notification_service.js');
+const {sendEmail} = require('./google_auth_service.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -9,14 +11,24 @@ async function register(user_data) {
     const {name, surname, email, password, role, bio = null, photo_url = null} = user_data;
     const password_hash = await bcrypt.hash(password, saltRounds);
     const user = await user_repository.register_user(name, surname, email, password_hash, role, bio, photo_url);
-    console.log('User created');
+    const {id} = user;
     const token = jwt.sign(
-        {id: user.id},
+        {id: id},
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     );
+    const message = `
+        Hello and welcome to your new account!\n
+        Start exploring MentorMatch and find the best opportunity for you!
+    `;
+    await send_notification(id, message);
+    await sendEmail({
+        to: email,
+        subject: 'Registration completed',
+        html: message
+    });
     return {user, token};
-};
+}
 
 async function login(login_data) {
     const {email, password} = login_data;
@@ -92,13 +104,13 @@ async function update_photo_url(user_id, user_data) {
 async function get_mentors(filters) {
     const {name = null, surname = null, email = null, availability_day = null, sector = null, last_id = 0, limit = 20} = filters;
     const result = await user_repository.get_mentors(name, surname, email, availability_day, sector, last_id, limit);
-    if(!result || result.length == 0) {
+    if(!result || result.length === 0) {
         const err = new Error('No mentors found with the selected filters');
         err.status = 404;
         throw err;
     }
     return result;
-};
+}
 
 async function get_id_from_email(email) {
     const {id} = await user_repository.get_id_from_email(email);
@@ -108,7 +120,27 @@ async function get_id_from_email(email) {
         throw err;
     }
     return id;
-};
+}
+
+async function get_role(user_id) {
+    const {role} = await user_repository.get_role(user_id);
+    if(!role) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+    }
+    return role;
+}
+
+async function get_email_from_id(id) {
+    const {email} = await user_repository.get_email_from_id(id);
+    if(!email) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+    }
+    return email;
+}
 
 async function get_me(user_id) {
     const data = await user_repository.get_public_data(user_id);
@@ -128,6 +160,8 @@ module.exports = {
     update_surname,
     update_bio,
     update_photo_url,
-    get_id_from_email
-    ,get_me
+    get_id_from_email,
+    get_email_from_id,
+    get_role,
+    get_me
 };
