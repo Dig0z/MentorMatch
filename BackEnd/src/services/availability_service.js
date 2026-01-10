@@ -18,7 +18,7 @@ function isContained(reqStart, reqEnd, availStart, availEnd) {
 }
 
 async function add_availability(mentor_id, payload) {
-    let {date, start_time, end_time} = payload;
+    let {date, start_time, end_time, is_paid} = payload;
     // Require date string YYYY-MM-DD for concrete per-day availability
     if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         const err = new Error('date must be a string in format YYYY-MM-DD');
@@ -44,7 +44,7 @@ async function add_availability(mentor_id, payload) {
         err.status = 409;
         throw err;
     }
-    const result = await availability_repository.add_availability(mentor_id, date, sHHMMSS, eHHMMSS);
+    const result = await availability_repository.add_availability(mentor_id, date, sHHMMSS, eHHMMSS, !!is_paid);
     if(!result) {
         const err = new Error('Failed to add availability');
         err.status = 500;
@@ -167,13 +167,13 @@ module.exports = {
                 if (bStart < sMin) {
                     const leftStart = minutesToHHMMSS(bStart);
                     const leftEnd = minutesToHHMMSS(sMin);
-                    await availability_repository.add_availability(mentor_id, dateStr, leftStart, leftEnd);
+                    await availability_repository.add_availability(mentor_id, dateStr, leftStart, leftEnd, !!b.is_paid);
                 }
                 // right segment
                 if (eMin < bEnd) {
                     const rightStart = minutesToHHMMSS(eMin);
                     const rightEnd = minutesToHHMMSS(bEnd);
-                    await availability_repository.add_availability(mentor_id, dateStr, rightStart, rightEnd);
+                    await availability_repository.add_availability(mentor_id, dateStr, rightStart, rightEnd, !!b.is_paid);
                 }
             }
         }

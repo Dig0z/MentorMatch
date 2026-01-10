@@ -5,5 +5,6 @@ module.exports = {
     mentor_sector_controller: require('./mentor_sector_controller'),
     google_auth_controller: require('./google_auth_controller'),
     session_controller: require('./session_controller'),
-    user_language_controller: require('./user_language_controller')
+    user_language_controller: require('./user_language_controller'),
+    review_controller: require('./review_controller')
 }

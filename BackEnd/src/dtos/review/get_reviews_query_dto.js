@@ -1,9 +1,7 @@
-const get_mentors_dto = {
+module.exports = {
     email: {
+        required: true,
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    },
-    availability_day: {
-        type: 'date'
     },
     last_id: {
         type: 'number'
@@ -12,5 +10,3 @@ const get_mentors_dto = {
         type: 'number'
     }
 };
-
-module.exports = get_mentors_dto;

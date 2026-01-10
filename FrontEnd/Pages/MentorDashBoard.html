@@ -115,19 +115,7 @@
             <div class="col-lg-6">
                 <div class="box-card">
                     <h4 class="fw-bold mb-3">Recensioni</h4>
-
-                    <div class="review-box mb-3">
-                        <strong>“Ottima sessione!”</strong>
-                        <p class="mb-1 small text-muted">Studente: Laura</p>
-                        <p class="small">Molto chiaro e disponibile, grazie!</p>
-                    </div>
-
-                    <div class="review-box mb-3">
-                        <strong>“Mi ha aiutato molto”</strong>
-                        <p class="mb-1 small text-muted">Studente: Giuseppe</p>
-                        <p class="small">Eccellente spiegazione sui miei dubbi.</p>
-                    </div>
-
+                    <div id="reviewsContainer"></div>
                 </div>
             </div>
 
@@ -145,6 +133,10 @@
                 <div class="modal-body">
                     <div class="mb-2">
                         <strong>Data:</strong> <span id="availabilityDate">—</span>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="availPaid">
+                        <label class="form-check-label" for="availPaid">Slot a pagamento (solo estetico)</label>
                     </div>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" name="availType" id="availFullDay" checked>
@@ -221,11 +213,43 @@
 
             const isMobile = window.innerWidth < 576;
 
+            // Visual-only helper: add days and format as local 'YYYY-MM-DDTHH:mm:ss'
+            function pad2(n) { return String(n).padStart(2, '0'); }
+            function formatLocal(d) {
+                const y = d.getFullYear();
+                const m = pad2(d.getMonth()+1);
+                const day = pad2(d.getDate());
+                const hh = pad2(d.getHours());
+                const mm = pad2(d.getMinutes());
+                const ss = pad2(d.getSeconds());
+                return `${y}-${m}-${day}T${hh}:${mm}:${ss}`;
+            }
+            function addDaysFormatLocal(dt, days) {
+                const s = String(dt);
+                const src = s.includes(' ') ? s.replace(' ', 'T') : s;
+                const d = new Date(src);
+                d.setDate(d.getDate() + days);
+                return formatLocal(d);
+            }
+            function minusDaysFormatLocal(dt, days) {
+                const s = String(dt);
+                const src = s.includes(' ') ? s.replace(' ', 'T') : s;
+                const d = new Date(src);
+                d.setDate(d.getDate() - days);
+                return formatLocal(d);
+            }
+            function addDaysToYMD(ymd, days) {
+                const d = new Date(`${ymd}T00:00:00`);
+                d.setDate(d.getDate() + days);
+                return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+            }
+
             /* ========================= SMALL CALENDAR ========================= */
 
             const smallCal = new FullCalendar.Calendar(
                 document.getElementById('calendar-small'),
                 {
+                    timeZone: 'local',
                     initialView: isMobile ? 'dayGridWeek' : 'dayGridMonth',
                     height: isMobile ? 400 : 550,
 
@@ -243,11 +267,19 @@
                             });
                             if (!res.ok) { successCallback([]); return; }
                             const sessions = await res.json();
-                            const events = (Array.isArray(sessions) ? sessions : (sessions?.data || [])).map(s => ({
+                            const arr = Array.isArray(sessions) ? sessions : (sessions?.data || []);
+                            arr.forEach(s => {
+                                try {
+                                    console.log('API start_datetime:', s.start_datetime);
+                                    console.log('Parsed local:', new Date(s.start_datetime).toString());
+                                    console.log('Day:', new Date(s.start_datetime).getDate());
+                                } catch (e) { console.log('Front parse error:', e?.message); }
+                            });
+                            const events = arr.map(s => ({
                                 id: s.id,
                                 title: s.status === 'confirmed' ? 'Sessione confermata' : 'Sessione prenotata',
-                                start: s.start_datetime,
-                                end: s.end_datetime,
+                                start: addDaysFormatLocal(minusDaysFormatLocal(s.start_datetime, 1), 1),
+                                end: addDaysFormatLocal(minusDaysFormatLocal(s.end_datetime, 1), 1),
                                 color: s.status === 'confirmed' ? '#4a90e2' : '#16a085'
                             }));
                             successCallback(events);
@@ -264,6 +296,7 @@
             const bigCal = new FullCalendar.Calendar(
                 document.getElementById('calendar-big'),
                 {
+                    timeZone: 'local',
                     initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
                     height: isMobile ? 400 : 550,
                     nowIndicator: true,
@@ -283,13 +316,22 @@
                                         headers: { 'Authorization': `Bearer ${token}` },
                                         cache: 'no-store'
                                     });
+                                    if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
                                     if (!res.ok) { successCallback([]); return; }
                                     const sessions = await res.json();
-                                    const events = (Array.isArray(sessions) ? sessions : (sessions?.data || [])).map(s => ({
+                                    const arr = Array.isArray(sessions) ? sessions : (sessions?.data || [])
+                                    arr.forEach(s => {
+                                        try {
+                                            console.log('API start_datetime:', s.start_datetime);
+                                            console.log('Parsed local:', new Date(s.start_datetime).toString());
+                                            console.log('Day:', new Date(s.start_datetime).getDate());
+                                        } catch (e) { console.log('Front parse error:', e?.message); }
+                                    });
+                                    const events = arr.map(s => ({
                                         id: s.id,
                                         title: s.status === 'confirmed' ? 'Sessione confermata' : 'Sessione prenotata',
-                                        start: s.start_datetime,
-                                        end: s.end_datetime,
+                                        start: addDaysFormatLocal(minusDaysFormatLocal(s.start_datetime, 1), 1),
+                                        end: addDaysFormatLocal(minusDaysFormatLocal(s.end_datetime, 1), 1),
                                         color: s.status === 'confirmed' ? '#007bff' : '#4a90e2'
                                     }));
                                     successCallback(events);
@@ -309,19 +351,24 @@
                                         headers: { 'Authorization': `Bearer ${token}` },
                                         cache: 'no-store'
                                     });
+                                    if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
                                     if (!res.ok) { successCallback([]); return; }
                                     const data = await res.json();
                                     const rows = data?.data || [];
                                     const events = rows.map(r => {
-                                        const dateStr = (typeof r.weekday === 'string') ? r.weekday.slice(0, 10) : new Date(r.weekday).toISOString().slice(0, 10);
+                                        const dateStr = (typeof r.weekday === 'string')
+                                            ? r.weekday.slice(0, 10)
+                                            : (() => { const d = new Date(r.weekday); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
                                         const s = String(r.start_time).slice(0,5);
                                         const e = String(r.end_time).slice(0,5);
+                                        const dPlus = addDaysToYMD(dateStr, 1);
+                                        const paid = !!(r.is_paid || r.paid);
                                         return {
-                                            title: 'Disponibile',
-                                            start: `${dateStr}T${s}`,
-                                            end: `${dateStr}T${e}`,
-                                            color: '#d1ecf1',
-                                            extendedProps: { availabilityId: r.id }
+                                            title: paid ? 'Disponibile • A pagamento' : 'Disponibile',
+                                            start: `${dPlus}T${s}`,
+                                            end: `${dPlus}T${e}`,
+                                            color: paid ? '#f9e79f' : '#d1ecf1',
+                                            extendedProps: { availabilityId: r.id, paid }
                                         };
                                     });
                                     successCallback(events);
@@ -335,7 +382,8 @@
                     dateClick(info) {
                         const role = localStorage.getItem('role');
                         if (role !== 'mentor') return;
-                        const dateStr = info.dateStr.slice(0, 10); // YYYY-MM-DD
+                        const d = info.date; // Date in local time
+                        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; // YYYY-MM-DD
                         document.getElementById('availabilityDate').textContent = dateStr;
                         const modal = new bootstrap.Modal(document.getElementById('availabilityModal'));
                         modal.show();
@@ -357,6 +405,7 @@
 
                         document.getElementById('saveAvailabilityBtn').onclick = async () => {
                             try {
+                                const isPaid = document.getElementById('availPaid').checked;
                                 if (full.checked) {
                                     // One full-day block: 09:00–18:00
                                     const s = '09:00';
@@ -367,15 +416,18 @@
                                             'Content-Type': 'application/json',
                                             'Authorization': `Bearer ${token}`
                                         },
-                                        body: JSON.stringify({ date: dateStr, start_time: s, end_time: e })
+                                        body: JSON.stringify({ date: dateStr, start_time: s, end_time: e, is_paid: !!isPaid })
                                     });
+                                    if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
                                     const data = await res.json().catch(() => ({}));
                                     if (!res.ok) {
                                         const msg = data?.message || 'Errore nel salvataggio';
                                         alert(msg);
                                         return;
                                     }
-                                    bigCal.addEvent({ title: 'Disponibile', start: `${dateStr}T${s}`, end: `${dateStr}T${e}`, color: '#d1ecf1', extendedProps: { availabilityId: data?.data?.id || null } });
+                                    const title = isPaid ? 'Disponibile • A pagamento' : 'Disponibile';
+                                    const color = isPaid ? '#f9e79f' : '#d1ecf1';
+                                    bigCal.addEvent({ title, start: `${dateStr}T${s}`, end: `${dateStr}T${e}`, color, extendedProps: { availabilityId: data?.data?.id || null, paid: !!isPaid } });
                                     modal.hide();
                                 } else {
                                     const s = start.value || '09:00';
@@ -386,15 +438,18 @@
                                             'Content-Type': 'application/json',
                                             'Authorization': `Bearer ${token}`
                                         },
-                                        body: JSON.stringify({ date: dateStr, start_time: s, end_time: e })
+                                        body: JSON.stringify({ date: dateStr, start_time: s, end_time: e, is_paid: !!isPaid })
                                     });
+                                    if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
                                     const data = await res.json().catch(() => ({}));
                                     if (!res.ok) {
                                         const msg = data?.message || 'Errore nel salvataggio';
                                         alert(msg);
                                         return;
                                     }
-                                    bigCal.addEvent({ title: 'Disponibile', start: `${dateStr}T${s}`, end: `${dateStr}T${e}`, color: '#d1ecf1', extendedProps: { availabilityId: data?.data?.id || null } });
+                                    const title = isPaid ? 'Disponibile • A pagamento' : 'Disponibile';
+                                    const color = isPaid ? '#f9e79f' : '#d1ecf1';
+                                    bigCal.addEvent({ title, start: `${dateStr}T${s}`, end: `${dateStr}T${e}`, color, extendedProps: { availabilityId: data?.data?.id || null, paid: !!isPaid } });
                                     modal.hide();
                                 }
                             } catch (err) {
@@ -410,7 +465,7 @@
                         if (!availabilityId) return; // ignora eventi non di disponibilità
                         const start = info.event.start;
                         const end = info.event.end;
-                        const dateStr = start?.toISOString().slice(0,10);
+                        const dateStr = start ? `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}` : null;
                         const s = start ? start.toTimeString().slice(0,5) : '—';
                         const e = end ? end.toTimeString().slice(0,5) : '—';
 
@@ -427,7 +482,10 @@
                                 method: 'DELETE',
                                 headers: { 'Authorization': `Bearer ${token}` }
                             })
-                            .then(res => res.json().catch(() => ({})))
+                            .then(res => {
+                                if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return Promise.reject('unauthorized'); }
+                                return res.json().catch(() => ({}))
+                            })
                             .then(j => {
                                 if (j?.success) {
                                     info.event.remove();
@@ -437,8 +495,10 @@
                                 }
                             })
                             .catch(err => {
-                                console.error(err);
-                                alert('Errore durante la rimozione');
+                                if (err !== 'unauthorized') {
+                                    console.error(err);
+                                    alert('Errore durante la rimozione');
+                                }
                             });
                         };
                     }
@@ -502,6 +562,59 @@
                 if (!document.hidden) loadNotifications();
             });
             setInterval(loadNotifications, 30000);
+        });
+    </script>
+
+    <!-- RECENSIONI SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const reviewsEl = document.getElementById('reviewsContainer');
+            if (!reviewsEl) return;
+            reviewsEl.innerHTML = '';
+            try {
+                if (!token) return;
+                // Get current mentor email
+                const meRes = await fetch('http://localhost:3000/api/user/me', {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
+                });
+                if (meRes.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
+                const meJson = await meRes.json().catch(() => ({}));
+                const email = meJson?.data?.email;
+                if (!email) { reviewsEl.innerHTML = '<p class="small text-muted mb-0">Nessuna recensione al momento.</p>'; return; }
+
+                const rres = await fetch(`http://localhost:3000/api/review/get_reviews?email=${encodeURIComponent(email)}&limit=20`, { cache: 'no-store' });
+                const rjson = await rres.json().catch(() => ({}));
+                const list = rjson?.data || [];
+                if (!Array.isArray(list) || list.length === 0) {
+                    reviewsEl.innerHTML = '<p class="small text-muted mb-0">Nessuna recensione al momento.</p>';
+                    return;
+                }
+                list.forEach(rv => {
+                    const box = document.createElement('div');
+                    box.className = 'review-box mb-3';
+                    const mName = rv.mentee_name ?? rv.menteeName ?? rv.name;
+                    const mSurname = rv.mentee_surname ?? rv.menteeSurname ?? rv.surname;
+                    const mail = rv.mentee_email ?? rv.email ?? '';
+                    let name = [mName, mSurname].filter(Boolean).join(' ').trim();
+                    if (!name || name.length < 2) {
+                        const local = (mail && typeof mail === 'string') ? mail.split('@')[0] : '';
+                        name = local || 'Studente';
+                    }
+                    const stars = '⭐'.repeat(Number(rv.rating) || 0);
+                    const when = rv.created_at ? new Date(rv.created_at).toLocaleDateString() : '';
+                    box.innerHTML = `
+                        <strong>${stars || 'Review'}</strong>
+                        <p class="mb-1 small text-muted">Studente: ${name} ${mail ? '('+mail+')' : ''} ${when ? '• ' + when : ''}</p>
+                        <p class="small">${rv.comment ? String(rv.comment) : ''}</p>
+                    `;
+                    reviewsEl.appendChild(box);
+                });
+            } catch (err) {
+                console.error('Errore caricando recensioni', err);
+                reviewsEl.innerHTML = '<p class="small text-muted mb-0">Impossibile caricare le recensioni.</p>';
+            }
         });
     </script>
 

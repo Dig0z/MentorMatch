@@ -10,6 +10,10 @@ const session_only_id_dto = require('../dtos/session/session_only_id_dto.js');
 
 router.post('/book_session', validate(book_session_dto), auth, asyncHandler(async (req, res) => {
     const mentee_id = req.user.id;
+    try {
+        const { mentor_email, date, start_time, end_time } = req.body || {};
+        console.log('Incoming book_session payload:', { mentor_email, date, start_time, end_time });
+    } catch {}
     const session = await session_service.book_session(mentee_id, req.body);
     const {id, start_datetime, end_datetime, status} = session;
     res.status(201).json({

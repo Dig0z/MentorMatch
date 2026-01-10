@@ -21,14 +21,19 @@ function auth(req, res, next) {
         return res.status(401).json('Missing token or invalid format');
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-
-    //aggiungo alla req il parametro .user, che conterrà il jwt
-    //"prima della firma", cioè nella forma: {{id: id}, JWT_SECRET, {expiresIn: *}}
-    req.user = payload;
-
-    //vado alla prossima funzione chiamata dal controller
-    next();
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        //aggiungo alla req il parametro .user, che conterrà il jwt
+        //"prima della firma", cioè nella forma: {{id: id}, JWT_SECRET, {expiresIn: *}}
+        req.user = payload;
+        //vado alla prossima funzione chiamata dal controller
+        next();
+    } catch (err) {
+        if (err && err.name === 'TokenExpiredError') {
+            return res.status(401).json({ success: false, error: { status: 401, message: 'Token expired' } });
+        }
+        return res.status(401).json({ success: false, error: { status: 401, message: 'Invalid token' } });
+    }
 
 };
 

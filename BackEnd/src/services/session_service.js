@@ -4,6 +4,7 @@ const availability_service = require('../services/availability_service.js');
 const google_service = require('./google_auth_service.js');
 const notification_service = require('../services/notification_service.js');
 const { parseTimeToMinutes, normalizeToHHMMSS } = require('../utils/time');
+const { normalizeSessionDateTimes, normalizeSessionArray } = require('../utils/datetime');
 const { parseDateYMD } = require('../utils/date');
 
 function httpError(status, message, details) {
@@ -70,7 +71,7 @@ async function book_session(mentee_id, session_data) {
     } catch (notifyErr) {
         console.warn('Notification send failed', notifyErr?.message || notifyErr);
     }
-    return session;
+    return normalizeSessionDateTimes(session);
 }
 
 async function confirm_booking(mentor_id, session_id) {
@@ -101,7 +102,7 @@ async function confirm_booking(mentor_id, session_id) {
         err.status = 500;
         throw err;
     }
-    return session;
+    return normalizeSessionDateTimes(session);
 }
 
 //Non elimino direttamente la session dal db per dare il tempo ad entrambi
@@ -115,7 +116,7 @@ async function cancel_session(user_id, session_id) {
         err.status = 500;
         throw err;
     }
-    return session;
+    return normalizeSessionDateTimes(session);
 }
 
 async function confirm_cancellation(user_id, session_id) {
@@ -133,12 +134,25 @@ async function confirm_cancellation(user_id, session_id) {
         throw err;
     }
     const deleted_session = await session_repository.delete_session(id, user_id);
-    return deleted_session;
+    return normalizeSessionDateTimes(deleted_session);
 }
 
 async function get_user_sessions(user_id) {
     const sessions = await session_repository.get_user_sessions(user_id);
-    return sessions || [];
+    try {
+        for (const row of sessions || []) {
+            console.log('DB start_datetime raw:', row.start_datetime);
+            try {
+                const iso = new Date(row.start_datetime).toISOString();
+                console.log('As ISO:', iso);
+            } catch (e) {
+                console.log('ISO conversion error:', e?.message);
+            }
+        }
+    } catch (e) {
+        console.log('Diagnostics logging failed:', e?.message);
+    }
+    return normalizeSessionArray(sessions || []);
 }
 
 module.exports = {

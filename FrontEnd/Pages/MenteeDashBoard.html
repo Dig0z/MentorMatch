@@ -86,6 +86,27 @@
             <div id="calendar"></div>
         </div>
 
+        <!-- MODAL: Cancella Prenotazione -->
+        <div class="modal fade" id="cancelSessionModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cancella prenotazione</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2"><strong>Data:</strong> <span id="cancelSessionDate">—</span></p>
+                        <p class="mb-3"><strong>Orario:</strong> <span id="cancelSessionTime">—</span></p>
+                        <p>Confermi di voler cancellare questa prenotazione? Verrà rimossa anche dal calendario del mentor.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="button" id="confirmCancelSessionBtn" class="btn btn-danger">Cancella</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- NOTIFICHE -->
         <div class="card p-4 shadow-sm">
             <h4 class="fw-bold mb-4">Notifiche</h4>
@@ -149,28 +170,135 @@
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
             const isMobile = window.innerWidth < 576;
+            // Visual adjustment: show sessions one day earlier on mentee calendar
+            function pad2(n) { return String(n).padStart(2, '0'); }
+            function formatLocal(d) {
+                const y = d.getFullYear();
+                const m = pad2(d.getMonth()+1);
+                const day = pad2(d.getDate());
+                const hh = pad2(d.getHours());
+                const mm = pad2(d.getMinutes());
+                const ss = pad2(d.getSeconds());
+                return `${y}-${m}-${day}T${hh}:${mm}:${ss}`;
+            }
+            function minusDaysFormatLocal(dt, days) {
+                const s = String(dt);
+                const src = s.includes(' ') ? s.replace(' ', 'T') : s;
+                const d = new Date(src);
+                d.setDate(d.getDate() - days);
+                return formatLocal(d);
+            }
+            function plusDaysFormatLocal(dt, days) {
+                const s = String(dt);
+                const src = s.includes(' ') ? s.replace(' ', 'T') : s;
+                const d = new Date(src);
+                d.setDate(d.getDate() + days);
+                return formatLocal(d);
+            }
+            function pad2(n) { return String(n).padStart(2, '0'); }
+            function formatLocal(d) {
+                const y = d.getFullYear();
+                const m = pad2(d.getMonth()+1);
+                const day = pad2(d.getDate());
+                const hh = pad2(d.getHours());
+                const mm = pad2(d.getMinutes());
+                const ss = pad2(d.getSeconds());
+                return `${y}-${m}-${day}T${hh}:${mm}:${ss}`;
+            }
+            function addDaysFormatLocal(dt, days) {
+                const s = String(dt);
+                const src = s.includes(' ') ? s.replace(' ', 'T') : s;
+                const d = new Date(src);
+                d.setDate(d.getDate() + days);
+                return formatLocal(d);
+            }
+
             const calendar = new FullCalendar.Calendar(calendarEl, {
+                timeZone: 'local',
                 initialView: isMobile ? 'dayGridWeek' : 'dayGridMonth',
                 height: isMobile ? 400 : 650,
                 headerToolbar: isMobile
                     ? { left: 'prev,next', center: 'title', right: '' }
                     : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
                 eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+                eventClick: function(info) {
+                    // Open cancel modal for this session
+                    const ev = info.event;
+                    const start = ev.start;
+                    const end = ev.end || ev.start;
+                    // Calendar displays sessions at -1 day; show the original date (+1) in the modal
+                    const disp = new Date(start);
+                    disp.setDate(disp.getDate() + 1);
+                    const dateStr = `${disp.getFullYear()}-${String(disp.getMonth()+1).padStart(2,'0')}-${String(disp.getDate()).padStart(2,'0')}`;
+                    const s = start.toTimeString().slice(0,5);
+                    const e = end.toTimeString().slice(0,5);
+                    document.getElementById('cancelSessionDate').textContent = dateStr;
+                    document.getElementById('cancelSessionTime').textContent = `${s} - ${e}`;
+                    const modal = new bootstrap.Modal(document.getElementById('cancelSessionModal'));
+                    modal.show();
+                    const btn = document.getElementById('confirmCancelSessionBtn');
+                    btn.onclick = async () => {
+                        try {
+                            const token = localStorage.getItem('token');
+                            if (!token) { localStorage.clear(); window.location.href = 'Log.html'; return; }
+                            // Step 1: mark as cancelled
+                            let res = await fetch(`${API_BASE}/api/session/cancel_session/${ev.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
+                            if (!res.ok) {
+                                const j = await res.json().catch(() => ({}));
+                                alert(j?.message || 'Impossibile cancellare la sessione');
+                                return;
+                            }
+                            // Step 2: hard delete so it disappears for everyone
+                            res = await fetch(`${API_BASE}/api/session/confirm_cancellation/${ev.id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
+                            if (!res.ok) {
+                                const j = await res.json().catch(() => ({}));
+                                alert(j?.message || 'Impossibile rimuovere definitivamente la sessione');
+                                return;
+                            }
+                            ev.remove();
+                            modal.hide();
+                        } catch (e) {
+                            console.error(e);
+                            alert('Errore durante la cancellazione');
+                        }
+                    };
+                },
                 events: async function(fetchInfo, successCallback, failureCallback) {
                     try {
                         if (!token) { successCallback([]); return; }
                         const res = await fetch(`${API_BASE}/api/session/get_sessions`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
+                        if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
                         if (!res.ok) { successCallback([]); return; }
                         const sessions = await res.json();
                         const arr = Array.isArray(sessions) ? sessions : (sessions?.data || []);
-                        const events = arr.map(s => ({
-                            id: s.id,
-                            title: s.status === 'confirmed' ? 'Sessione confermata' : 'Sessione prenotata',
-                            start: s.start_datetime,
-                            end: s.end_datetime,
-                        }));
+                        arr.forEach(s => {
+                            try {
+                                console.log('API start_datetime:', s.start_datetime);
+                                console.log('Parsed local:', new Date(s.start_datetime).toString());
+                                console.log('Day:', new Date(s.start_datetime).getDate());
+                            } catch (e) { console.log('Front parse error:', e?.message); }
+                        });
+                        const events = arr.map(s => {
+                            const shiftedStart = minusDaysFormatLocal(s.start_datetime, 1);
+                            const shiftedEnd = minusDaysFormatLocal(s.end_datetime, 1);
+                            // After subtracting one day, add one day back for display
+                            return {
+                                id: s.id,
+                                title: s.status === 'confirmed' ? 'Sessione confermata' : 'Sessione prenotata',
+                                start: plusDaysFormatLocal(shiftedStart, 1),
+                                end: plusDaysFormatLocal(shiftedEnd, 1),
+                            };
+                        });
                         successCallback(events);
                     } catch (err) {
                         console.error('Errore nel caricamento delle sessioni', err);

@@ -10,5 +10,6 @@ router.use('/mentor_sector', controllers.mentor_sector_controller);
 router.use('/google_auth', controllers.google_auth_controller);
 router.use('/session', controllers.session_controller);
 router.use('/user_language', controllers.user_language_controller);
+router.use('/review', controllers.review_controller);
 
 module.exports = router;

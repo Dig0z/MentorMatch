@@ -69,11 +69,21 @@ CREATE TABLE notifications (
 );
 
 CREATE TABLE google_meet_token(
-	id SERIAL PRIMARY KEY,
-	access_token TEXT,
-	refresh_token TEXT,
-	scope TEXT,
-	expiry_date TEXT,
-	singleton BOOLEAN GENERATED ALWAYS AS (TRUE) STORED,
+    id SERIAL PRIMARY KEY,
+    access_token  TEXT,
+    refresh_token TEXT,
+    scope         TEXT,
+    token_type    TEXT,
+    expiry_date   TEXT,
+    singleton     BOOLEAN GENERATED ALWAYS AS (TRUE) STORED,
     CONSTRAINT only_one_row UNIQUE (singleton)
+);
+
+-- Languages spoken by users (mentor or mentee)
+CREATE TABLE user_languages (
+    user_id       INT NOT NULL,
+    language_name VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, language_name),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
 );
