@@ -106,6 +106,7 @@
                         <div class="mt-3">
                             <p class="fw-semibold mb-1">Selezione corrente:</p>
                             <p id="selectedSlot" class="text-muted">Nessuna selezione</p>
+                            <p id="paidInfo" class="small text-warning d-none">Slot a pagamento: concorda il pagamento con il mentor durante la sessione.</p>
                         </div>
                     </div>
 
@@ -155,23 +156,50 @@
                 return;
             }
 
+            function dateToYMDLocal(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+                function addDaysToYMD(ymd, days) {
+                    const d = new Date(`${ymd}T00:00:00`);
+                    d.setDate(d.getDate() + days);
+                    return dateToYMDLocal(d);
+                }
+
             const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
                 initialView: "dayGridMonth",
                 height: 600,
+                timeZone: 'local',
                 headerToolbar: {
                     left: "prev,next today",
                     center: "title",
                     right: "dayGridMonth,timeGridWeek,timeGridDay"
                 },
-                eventClick(info) {
-                    if (info.event.title !== 'Disponibile') return;
-                    const date = info.event.startStr.slice(0, 10); // YYYY-MM-DD
-                    const start = info.event.startStr.slice(11, 16); // HH:MM
-                    const end = info.event.endStr.slice(11, 16);     // HH:MM
-                    selected = { date, start, end };
-                    document.getElementById('selectedSlot').textContent = `${date} • ${start} - ${end}`;
-                    document.getElementById('bookBtn').disabled = false;
-                }
+                    eventClick(info) {
+                        const title = info.event.title || '';
+                        if (!title.toLowerCase().startsWith('disponibile')) return;
+                        const startDateVisible = new Date(info.event.start);
+                        // Compute real date for backend (visible is +1 day)
+                        const realDate = new Date(startDateVisible);
+                        realDate.setDate(realDate.getDate() - 1);
+                        const date = dateToYMDLocal(realDate); // YYYY-MM-DD real for backend
+                        const start = startDateVisible.toTimeString().slice(0, 5);
+                        const end = info.event.end ? info.event.end.toTimeString().slice(0, 5) : start;
+                        selected = { date, start, end };
+                        const displayDate = dateToYMDLocal(startDateVisible);
+                        document.getElementById('selectedSlot').textContent = `${displayDate} • ${start} - ${end}`;
+                        const isPaid = /pagamento/i.test(title)
+                            || (info.event.extendedProps && info.event.extendedProps.paid === true)
+                            || (info.event.backgroundColor && String(info.event.backgroundColor).toLowerCase() === '#f9e79f')
+                            || (info.event.color && String(info.event.color).toLowerCase() === '#f9e79f');
+                        const paidInfoEl = document.getElementById('paidInfo');
+                        if (paidInfoEl) {
+                            paidInfoEl.classList.toggle('d-none', !isPaid);
+                        }
+                        document.getElementById('bookBtn').disabled = false;
+                    }
             });
             calendar.render();
 
@@ -214,19 +242,25 @@
                     const ares = await fetch(`${API_BASE}/api/mentor_availability/get_availabilities_by_email?email=${encodeURIComponent(email)}`, {
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                     });
+                    if (ares.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
                     const adata = await ares.json();
                     const avs = adata?.data || [];
-                    avs.forEach(av => {
-                        const date = typeof av.weekday === 'string' ? av.weekday.slice(0,10) : new Date(av.weekday).toISOString().slice(0,10);
-                        const s = String(av.start_time).slice(0,5);
-                        const e = String(av.end_time).slice(0,5);
-                        calendar.addEvent({
-                            title: 'Disponibile',
-                            start: `${date}T${s}`,
-                            end: `${date}T${e}`,
-                            color: '#5cb85c'
+                        avs.forEach(av => {
+                            const date = (typeof av.weekday === 'string')
+                                ? av.weekday.slice(0,10)
+                                : (() => { const d = new Date(av.weekday); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+                            const s = String(av.start_time).slice(0,5);
+                            const e = String(av.end_time).slice(0,5);
+                            const dPlus = addDaysToYMD(date, 1); // visual-only +1 day
+                            const paid = !!(av.paid || av.is_paid);
+                            calendar.addEvent({
+                                title: paid ? 'Disponibile • A pagamento' : 'Disponibile',
+                                start: `${dPlus}T${s}`,
+                                end: `${dPlus}T${e}`,
+                                color: paid ? '#f9e79f' : '#5cb85c',
+                                extendedProps: { paid }
+                            });
                         });
-                    });
                 } catch (e) {
                     console.error('Load mentor availabilities failed', e);
                 }
@@ -238,11 +272,37 @@
 
     <!-- REVIEW SCRIPT -->
     <script>
-        document.getElementById("submitReview").addEventListener("click", () => {
+        document.getElementById("submitReview").addEventListener("click", async () => {
+            const API_BASE = 'http://localhost:3000';
+            const token = localStorage.getItem('token');
             const rating = document.getElementById("rating").value;
             const text = document.getElementById("reviewText").value;
+            const params = new URLSearchParams(window.location.search);
+            const mentorEmail = params.get('email');
 
-            alert("Review inviata!\n⭐ = " + rating + "\nCommento: " + text);
+            if (!mentorEmail) { alert('Mentor non valido'); return; }
+            if (!token) { alert('Devi fare il login'); window.location.href = 'Log.html'; return; }
+            try {
+                const res = await fetch(`${API_BASE}/api/review/add_review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ mentor_email: mentorEmail, rating: Number(rating), comment: text })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
+                if (!res.ok || !data?.success) {
+                    alert(data?.message || 'Impossibile inviare la review');
+                    return;
+                }
+                document.getElementById("reviewText").value = '';
+                alert('Review inviata! Grazie!');
+            } catch (e) {
+                console.error(e);
+                alert('Errore durante l\'invio della review');
+            }
         });
     </script>
 
@@ -263,6 +323,13 @@
                 return;
             }
             try {
+                // Al click prenota: somma +1 giorno alla data inviata
+                const base = new Date(`${selected.date}T00:00:00`);
+                base.setDate(base.getDate() + 1);
+                const y = base.getFullYear();
+                const m = String(base.getMonth() + 1).padStart(2, '0');
+                const d = String(base.getDate()).padStart(2, '0');
+                const dateToSend = `${y}-${m}-${d}`;
                 const res = await fetch(`${API_BASE}/api/session/book_session`, {
                     method: 'POST',
                     headers: {
@@ -271,11 +338,12 @@
                     },
                     body: JSON.stringify({
                         mentor_email: mentorEmail,
-                        date: selected.date,
+                        date: dateToSend,
                         start_time: selected.start,
                         end_time: selected.end
                     })
                 });
+                if (res.status === 401) { localStorage.clear(); window.location.href = 'Log.html'; return; }
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
                     const msg = data?.message || 'Errore durante la prenotazione';

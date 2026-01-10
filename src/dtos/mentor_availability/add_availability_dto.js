@@ -13,6 +13,10 @@ const add_availability_dto = {
         required: true,
         type: 'time',
         pattern: /^\d{2}:\d{2}$/   //TIME (HH:MM)
+    },
+    is_paid: {
+        required: false,
+        type: 'boolean'
     }
 };
 

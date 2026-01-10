@@ -18,9 +18,8 @@ function formatTime(t) {
 	return m ? m[1] : String(t);
 }
 
-function buildCard({fullName, bio, photo, sectors, availability, languages, rating, email}) {
+function buildCard({fullName, bio, photo, sectors, languages, rating, email}) {
 	const sectorsText = sectors && sectors.size > 0 ? `Settori: ${Array.from(sectors).join(', ')}` : '';
-	const availText = availability && availability.size > 0 ? `Disponibilità: ${Array.from(availability).join(' • ')}` : '';
 	const langsText = languages && languages.size > 0 ? `Lingue: ${Array.from(languages).join(', ')}` : '';
 	const badge = rating ? ` <span class="badge bg-warning text-dark">⭐ ${rating}</span>` : ` <span class="badge bg-secondary">n/d</span>`;
 
@@ -33,7 +32,6 @@ function buildCard({fullName, bio, photo, sectors, availability, languages, rati
 					${bio ? `<p class="mb-1 small text-muted">${bio}</p>` : ''}
 					  ${langsText ? `<p class="small mb-0">${langsText}</p>` : ''}
 					${sectorsText ? `<p class="small mb-0">${sectorsText}</p>` : ''}
-					${availText ? `<p class="small mb-0">${availText}</p>` : ''}
 				</div>
 				<button class="mentor-btn" title="Dettagli" data-email="${email || ''}">+</button>
 			</div>
@@ -75,11 +73,7 @@ async function fetchMentors() {
 			const item = byEmail.get(key);
 			if (r.sector_name) item.sectors.add(r.sector_name);
 			if (r.language_name) item.languages.add(r.language_name);
-			if (r.weekday !== null && r.weekday !== undefined) {
-				const day = weekdayLabel(r.weekday);
-				const slot = `${day} ${formatTime(r.start_time)}-${formatTime(r.end_time)}`.trim();
-				item.availability.add(slot);
-			}
+			// Non mostrare disponibilità nella card del catalogo (richiesta UX)
 		}
 
 		allMentors = Array.from(byEmail.values());
@@ -148,13 +142,16 @@ function setupLanguageFilter() {
 function applyFilters() {
 	const langs = getSelectedLanguages();
 	const sectors = getSelectedSectorsFilter();
+	const ratingMin = getSelectedRatingMin();
 
 	const useLangs = !(langs.size === 0 || langs.has('Tutte'));
 	const useSectors = !(sectors.size === 0 || sectors.has('Tutti'));
+	const useRating = ratingMin !== null;
 
 	return allMentors.filter(m => {
 		let okLang = true;
 		let okSector = true;
+		let okRating = true;
 
 		if (useLangs) {
 			okLang = !!m.languages && m.languages.size > 0 && [...langs].some(l => m.languages.has(l));
@@ -162,8 +159,12 @@ function applyFilters() {
 		if (useSectors) {
 			okSector = !!m.sectors && m.sectors.size > 0 && [...sectors].some(s => m.sectors.has(s));
 		}
+		if (useRating) {
+			const r = Number(m.rating || 0);
+			okRating = r >= ratingMin;
+		}
 
-		return okLang && okSector;
+		return okLang && okSector && okRating;
 	});
 }
 
@@ -178,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	updateLangLabel();
 	setupSectorFilter();
 	updateSectorLabel();
+	setupRatingFilter();
 
 	// Delegated handler for '+' button: navigate to mentor profile (mentees only)
 	const container = document.getElementById('mentorsList');
@@ -237,5 +239,23 @@ function setupSectorFilter() {
 			updateSectorLabel();
 			renderList(applyFilters());
 		});
+	});
+}
+
+// ---- Filtro Valutazione (select) ----
+function getSelectedRatingMin() {
+	const sel = document.getElementById('ratingMinSelect');
+	if (!sel) return null;
+	const v = sel.value;
+	if (v === '') return null;
+	const n = Number(v);
+	return Number.isFinite(n) ? n : null;
+}
+
+function setupRatingFilter() {
+	const sel = document.getElementById('ratingMinSelect');
+	if (!sel) return;
+	sel.addEventListener('change', () => {
+		renderList(applyFilters());
 	});
 }

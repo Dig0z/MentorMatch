@@ -1,21 +1,32 @@
 const path = require('path');
 const {pool} = require(path.resolve(__dirname, '..', 'config', 'db.js'));
 
-async function add_availability(mentor_id, weekday, start_time, end_time) {
+let ensuredIsPaid = false;
+async function ensureIsPaidColumn() {
+    if (ensuredIsPaid) return;
+    // Safe-guard: add column if it doesn't exist
+    const sql = `ALTER TABLE mentor_availability ADD COLUMN IF NOT EXISTS is_paid BOOLEAN DEFAULT FALSE`;
+    try { await pool.query(sql); } catch (e) { /* ignore */ }
+    ensuredIsPaid = true;
+}
+
+async function add_availability(mentor_id, weekday, start_time, end_time, is_paid = false) {
+    await ensureIsPaidColumn();
     const query = `
-        INSERT INTO mentor_availability(mentor_id, weekday, start_time, end_time)
-        VALUES($1, $2, $3, $4)
-        RETURNING id, weekday, start_time, end_time
+        INSERT INTO mentor_availability(mentor_id, weekday, start_time, end_time, is_paid)
+        VALUES($1, $2, $3, $4, $5)
+        RETURNING id, weekday, start_time, end_time, is_paid
     `;
-    const values = [mentor_id, weekday, start_time, end_time];
+    const values = [mentor_id, weekday, start_time, end_time, !!is_paid];
     const result = await pool.query(query, values);
     return result.rows[0];
 };
 
 // NOTE: `weekday` column in DB stores a DATE (misnamed). We filter by concrete date.
 async function check_availability(mentor_id, dateStr) {
+    await ensureIsPaidColumn();
     const query = `
-        SELECT id, weekday, start_time, end_time
+        SELECT id, weekday, start_time, end_time, is_paid
         FROM mentor_availability
         WHERE mentor_id = $1
         AND weekday = $2::date
@@ -25,8 +36,9 @@ async function check_availability(mentor_id, dateStr) {
 }
 
 async function get_availabilities(mentor_id) {
+    await ensureIsPaidColumn();
     const query = `
-        SELECT id, weekday, start_time, end_time
+        SELECT id, weekday, start_time, end_time, is_paid
         FROM mentor_availability
         WHERE mentor_id = $1
     `;
@@ -35,29 +47,32 @@ async function get_availabilities(mentor_id) {
 }
 
 async function remove_availability(id, mentor_id) {
+    await ensureIsPaidColumn();
     const query = `
         DELETE
         FROM mentor_availability
         WHERE id = $1
         AND mentor_id = $2
-        RETURNING id, weekday, start_time, end_time
+        RETURNING id, weekday, start_time, end_time, is_paid
     `;
     const old_availability = await pool.query(query, [id, mentor_id]);
     return old_availability.rows[0];
 }
 
 async function remove_all(mentor_id) {
+    await ensureIsPaidColumn();
     const query = `
         DELETE
         FROM mentor_availability
         WHERE mentor_id = $1
-        RETURNING id, weekday, start_time, end_time
+        RETURNING id, weekday, start_time, end_time, is_paid
     `;
     const dates = await pool.query(query, [mentor_id]);
     return dates.rows;
 }
 
 async function get_availability(mentor_id, weekday, start_time, end_time) {
+    await ensureIsPaidColumn();
     const query = `
         SELECT id
         FROM mentor_availability
@@ -71,8 +86,9 @@ async function get_availability(mentor_id, weekday, start_time, end_time) {
 }
 
 async function get_day_availabilities(mentor_id, dateStr) {
+    await ensureIsPaidColumn();
     const query = `
-        SELECT id, weekday, start_time, end_time
+        SELECT id, weekday, start_time, end_time, is_paid
         FROM mentor_availability
         WHERE mentor_id = $1
         AND weekday = $2::date
