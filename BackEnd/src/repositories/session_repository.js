@@ -83,6 +83,16 @@ async function find_overlaps_for_mentor(mentor_id, start_datetime, end_datetime)
     return result.rows;
 }
 
+async function get_session_participants(id) {
+    const query = `
+        SELECT mentor_id, mentee_id
+        FROM sessions
+        WHERE id = $1
+    `;
+    const result = await pool.query(query, [id]);
+    return result.rows[0];
+}
+
 module.exports = {
     book_session,
     update_status,
@@ -90,5 +100,6 @@ module.exports = {
     delete_session,
     get_session,
     get_user_sessions,
-    find_overlaps_for_mentor
+    find_overlaps_for_mentor,
+    get_session_participants
 };
