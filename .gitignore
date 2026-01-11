@@ -3,6 +3,9 @@
 sendgrid.env
 sendgrid.env.ps1
 
+# Jest
+/coverage/
+
 # Playwright
 /test-results/
 /playwright-report/

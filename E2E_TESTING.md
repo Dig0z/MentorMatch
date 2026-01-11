@@ -1,5 +1,9 @@
 # End-to-End Testing with Playwright
 
+> **Note:** E2E tests (Playwright) are separate from unit tests (Jest):
+> - **Unit tests**: Run with `npm test` (Jest) - located in `BackEnd/test/`
+> - **E2E tests**: Run with `npm run test:e2e` (Playwright) - located in `e2e/`
+
 ### Test Coverage
 
 Our E2E test suite covers:
