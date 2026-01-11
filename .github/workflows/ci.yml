@@ -243,9 +243,23 @@ jobs:
 
       - name: Start application server
         run: |
+          echo "Starting application server in background..."
           npm run start:test &
-          echo "Waiting for server to start..."
-          timeout 60 bash -c 'until curl -f http://localhost:3000/Pages/Home.html; do sleep 2; done'
+          SERVER_PID=$!
+          echo "Server started with PID: $SERVER_PID"
+          
+          echo "Waiting for server to become ready..."
+          timeout 60 bash -c 'until curl -sf http://localhost:3000/Pages/Home.html > /dev/null; do 
+            echo "Waiting for server... (attempt $((++attempt)))"
+            sleep 2
+          done' || {
+            echo "::error::Server failed to start within 60 seconds"
+            echo "Server logs:"
+            jobs -l
+            exit 1
+          }
+          
+          echo "✅ Server is ready!"
         env:
           CI: true
 
