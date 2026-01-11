@@ -12,7 +12,7 @@ The CI workflow runs automatically on:
 
 ## Jobs Overview
 
-The CI pipeline consists of 4 jobs that run in parallel:
+The CI pipeline consists of 5 jobs that run in parallel:
 
 ### 1. Code Quality & Linting
 **Duration:** ~1-2 minutes
@@ -21,6 +21,7 @@ The CI pipeline consists of 4 jobs that run in parallel:
 - ✅ Checkout code
 - ✅ Setup Node.js 22.x
 - ✅ Install dependencies (with caching)
+- ✅ Run Jest tests (unit tests)
 - ✅ Run ESLint on backend code
 - ✅ Security audit (npm audit)
 - ✅ Validate required files exist
@@ -28,6 +29,7 @@ The CI pipeline consists of 4 jobs that run in parallel:
 - ✅ Validate package.json scripts
 
 **What it checks:**
+- Unit tests pass (BackEnd/test/)
 - Code style and quality issues (== vs ===, unused variables, etc.)
 - Security vulnerabilities in npm packages
 - Required files present (Dockerfile, .env.example, etc.)
@@ -50,7 +52,40 @@ The CI pipeline consists of 4 jobs that run in parallel:
 - No critical/high vulnerabilities in base image or dependencies
 - Container starts and runs properly
 
-### 3. Configuration Validation
+### 3. E2E Tests (Playwright)
+**Duration:** ~3-5 minutes
+
+**Steps:**
+- ✅ Checkout code
+- ✅ Setup Node.js 22.x
+- ✅ Install dependencies
+- ✅ Install Playwright browsers (Chromium)
+- ✅ Setup PostgreSQL test database
+- ✅ Load database schema
+- ✅ Create test environment configuration
+- ✅ Start application server
+- ✅ Run Playwright E2E tests
+- ✅ Upload test reports and screenshots
+
+**What it checks:**
+- Authentication flows (register, login, logout)
+- Mentor catalog and search functionality
+- Session booking workflows
+- Review system functionality
+- User dashboards (mentee and mentor)
+- End-to-end user journeys
+
+**Test Coverage:**
+- `e2e/auth.spec.js` - Authentication tests
+- `e2e/mentor-catalog.spec.js` - Mentor browsing tests
+- `e2e/session-booking.spec.js` - Booking flow tests
+- `e2e/reviews.spec.js` - Review system tests
+
+**Artifacts:**
+- HTML test report (kept for 30 days)
+- Screenshots of failed tests (kept for 7 days)
+
+### 4. Configuration Validation
 **Duration:** ~30 seconds
 
 **Steps:**
@@ -65,7 +100,7 @@ The CI pipeline consists of 4 jobs that run in parallel:
 - Routes file exports properly
 - Dependencies are up-to-date (informational)
 
-### 4. CI Summary
+### 5. CI Summary
 **Duration:** ~5 seconds
 
 **Steps:**
@@ -148,13 +183,46 @@ To add deployment after successful build:
 deploy:
   name: Deploy to Production
   runs-on: ubuntu-latest
-  needs: [code-quality, docker-build, config-validation]
+  needs: [code-quality, docker-build, e2e-tests, config-validation]
   if: github.ref == 'refs/heads/main'
   steps:
     - name: Deploy
       run: |
         # Deployment commands
 ```
+
+## E2E Testing
+
+The CI pipeline includes comprehensive end-to-end testing using Playwright.
+
+### Test Execution
+
+E2E tests run automatically in CI with:
+- PostgreSQL test database (ephemeral service)
+- Application server started in test mode
+- Chromium browser (headless)
+- Parallel test execution
+
+### Viewing E2E Test Results
+
+After a CI run:
+
+1. Go to **Actions** tab in GitHub
+2. Click on the workflow run
+3. Click on **E2E Tests (Playwright)** job
+4. View test results in the job output
+5. Download artifacts:
+   - `playwright-report` - Full HTML test report
+   - `playwright-screenshots` - Screenshots from failed tests (only on failure)
+
+### Running E2E Tests Locally
+
+See the detailed [E2E Testing Documentation](../E2E_TESTING.md) for:
+- Local setup instructions
+- Running tests in different modes
+- Writing new tests
+- Debugging test failures
+- Best practices
 
 ## Maintenance
 

@@ -179,7 +179,99 @@ jobs:
           # Cleanup
           docker rm -f mentormatch-test 2>/dev/null || true
 
-  # Job 3: Configuration Validation
+  # Job 3: E2E Tests with Playwright
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: mentormatch_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Setup test database
+        run: |
+          echo "Setting up test database..."
+          PGPASSWORD=test_password psql -h localhost -U test_user -d mentormatch_test < DataBase/Mentormatch.sql
+        env:
+          PGPASSWORD: test_password
+
+      - name: Create test environment file
+        run: |
+          cat > BackEnd/.env << EOF
+          DB_HOST=localhost
+          DB_PORT=5432
+          DB_NAME=mentormatch_test
+          DB_USER=test_user
+          DB_PASSWORD=test_password
+          DB_SCHEMA=Mentormatch
+          JWT_SECRET=test_jwt_secret_for_ci_testing_only
+          SENDGRID_API_KEY=SG.test_key_for_ci_only
+          GOOGLE_CLIENT_ID=test_google_client_id
+          GOOGLE_CLIENT_SECRET=test_google_client_secret
+          GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
+          PORT=3000
+          NODE_ENV=test
+          EOF
+
+      - name: Start application server
+        run: |
+          npm run start:test &
+          echo "Waiting for server to start..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000/Pages/Home.html; do sleep 2; done'
+        env:
+          CI: true
+
+      - name: Run Playwright E2E tests
+        run: npm run test:e2e
+        env:
+          CI: true
+          BASE_URL: http://localhost:3000
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots
+          path: e2e/screenshots/
+          retention-days: 7
+
+  # Job 4: Configuration Validation
   config-validation:
     name: Configuration Validation
     runs-on: ubuntu-latest
@@ -268,7 +360,7 @@ jobs:
   ci-summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [code-quality, docker-build, config-validation]
+    needs: [code-quality, docker-build, e2e-tests, config-validation]
     if: always()
     
     steps:
@@ -280,10 +372,12 @@ jobs:
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Config Validation | ${{ needs.config-validation.result }} |" >> $GITHUB_STEP_SUMMARY
           
           if [[ "${{ needs.code-quality.result }}" == "success" ]] && \
              [[ "${{ needs.docker-build.result }}" == "success" ]] && \
+             [[ "${{ needs.e2e-tests.result }}" == "success" ]] && \
              [[ "${{ needs.config-validation.result }}" == "success" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "✅ **All checks passed!**" >> $GITHUB_STEP_SUMMARY
