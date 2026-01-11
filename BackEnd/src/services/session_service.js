@@ -66,7 +66,7 @@ async function book_session(mentee_id, session_data) {
         console.warn('Availability consume failed', consumeErr?.message || consumeErr);
     }
     // Send notification to mentor with mentee details and booking time
-    try {
+
         const mentee = await user_service.get_me(mentee_id);
         const nameStr = [mentee?.name, mentee?.surname].filter(Boolean).join(' ');
         const sShort = sHHMMSS.slice(0,5);
@@ -75,10 +75,9 @@ async function book_session(mentee_id, session_data) {
         await notification_service.send_notification(mid, message);
 
         // Email notifications (mentor and mentee)
-        try {
             const mentor = await user_service.get_me(mid);
             const mentorName = [mentor?.name, mentor?.surname].filter(Boolean).join(' ');
-            const meetLink = getFakeMeetLink();
+            const meetLink = await google_service.createMeetLink(start_datetime, end_datetime);
 
             const subject = 'MentorMatch: Nuova prenotazione';
             const htmlMentor = `
@@ -98,6 +97,7 @@ async function book_session(mentee_id, session_data) {
             // Send to mentor
             if (mentor?.email) {
                 await sendEmail({ to: mentor.email, subject, text: textMentor, html: htmlMentor });
+                await google_service.sendEmail({ to: mentor.email, subject, text: textMentor, html: htmlMentor });
             }
 
             // Send to mentee (confirmation)
@@ -117,13 +117,8 @@ async function book_session(mentee_id, session_data) {
             const textMentee = `Ciao ${nameStr || 'Studente'},\nPrenotazione inviata al mentor ${mentorName || mentor?.email || ''} per il ${date} dalle ${sShort} alle ${eShort}. Link Meet: ${meetLink}`;
             if (mentee?.email) {
                 await sendEmail({ to: mentee.email, subject: subjectMentee, text: textMentee, html: htmlMentee });
+                await google_service.sendEmail({ to: mentee.email, subject: subjectMentee, text: textMentee, html: htmlMentee });
             }
-        } catch (mailErr) {
-            console.warn('Email send failed (booking):', mailErr?.response?.body || mailErr?.message || mailErr);
-        }
-    } catch (notifyErr) {
-        console.warn('Notification send failed', notifyErr?.message || notifyErr);
-    }
     return normalizeSessionDateTimes(session);
 }
 

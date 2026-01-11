@@ -12,7 +12,10 @@ const client = new google.auth.OAuth2(
 function getAuthUrl() {
     return client.generateAuthUrl({
         access_type: 'offline',
-        scope: ['https://www.googleapis.com/auth/calendar'],
+        scope: [
+            'https://www.googleapis.com/auth/calendar',
+            'https://www.googleapis.com/auth/gmail.send'
+        ],
         prompt: 'consent'
     });
 }
@@ -59,8 +62,11 @@ async function loadSavedTokens() {
     client.setCredentials(plain_tokens);
 }
 
-async function createMeetLink(start_datetime, end_datetime) {
+async function createMeetLink(start, end) {
     const calendar = google.calendar({ version: 'v3', auth: client });
+
+    const start_datetime = toRFC3339(start);
+    const end_datetime = toRFC3339(end);
 
     const res = await calendar.events.insert({
         calendarId: 'primary',
@@ -112,9 +118,75 @@ function decypher(cypher_string) {
     return string;
 }
 
+function toRFC3339(datetimeString, timeZone = "Europe/Rome") {
+  // datetimeString: "YYYY-MM-DD HH:mm"
+  const [datePart, timePart] = datetimeString.split(" ");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute] = timePart.split(":").map(Number);
+
+  // Crea una data nella timezone specificata
+  const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+  // Usa Intl per ottenere l'offset corretto
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  const parts = formatter.formatToParts(date);
+  const get = type => parts.find(p => p.type === type).value;
+
+  const formatted = `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}`;
+
+  // Calcola l'offset della timezone
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMinutes);
+  const offset = `${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
+
+  return `${formatted}${offset}`;
+}
+
+
+async function sendEmail({to, subject, html}) {
+    const gmail = google.gmail({ version: "v1", auth: client });
+
+    const messageParts = [
+        `To: ${to}`,
+        `Subject: ${subject}`,
+        "Content-Type: text/html; charset=utf-8",
+        "",
+        html
+    ];
+
+    const message = messageParts.join("\n");
+
+    const encodedMessage = Buffer.from(message)
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+
+    const res = await gmail.users.messages.send({
+        userId: "me",
+        requestBody: {
+            raw: encodedMessage
+        }
+    });
+
+    return res.data;
+}
+
 module.exports = {
     getAuthUrl,
     setAuthCode,
     loadSavedTokens,
-    createMeetLink
+    createMeetLink,
+    sendEmail
 };
