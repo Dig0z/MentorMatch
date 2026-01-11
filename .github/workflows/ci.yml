@@ -25,22 +25,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: BackEnd/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install backend dependencies
-        working-directory: ./BackEnd
+      - name: Install dependencies
         run: npm ci
 
       - name: Run ESLint on backend
-        working-directory: ./BackEnd
-        run: |
-          npx eslint src/**/*.js --format stylish || echo "::warning::ESLint found issues but continuing..."
+        run: npm run lint || echo "::warning::ESLint found issues but continuing..."
         continue-on-error: true
 
       - name: Check for security vulnerabilities
-        working-directory: ./BackEnd
-        run: |
-          npm audit --audit-level=moderate || echo "::warning::Security vulnerabilities found"
+        run: npm audit --audit-level=moderate || echo "::warning::Security vulnerabilities found"
         continue-on-error: true
 
       - name: Validate required files exist
@@ -52,7 +47,8 @@ jobs:
             ".env.example"
             "BackEnd/src/app.js"
             "BackEnd/src/bootstrap.js"
-            "BackEnd/package.json"
+            "package.json"
+            "package-lock.json"
             "DataBase/Mentormatch.sql"
             "FrontEnd/Pages/Home.html"
           )
@@ -85,7 +81,6 @@ jobs:
         continue-on-error: true
 
       - name: Validate package.json scripts
-        working-directory: ./BackEnd
         run: |
           echo "Validating package.json scripts..."
           if ! grep -q '"start"' package.json; then
@@ -236,9 +231,7 @@ jobs:
           docker rm postgres-test
 
       - name: Check for outdated dependencies
-        working-directory: ./BackEnd
-        run: |
-          npm outdated || echo "Some dependencies are outdated (informational only)"
+        run: npm outdated || echo "Some dependencies are outdated (informational only)"
         continue-on-error: true
 
       - name: Validate API routes configuration
