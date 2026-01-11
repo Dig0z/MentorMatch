@@ -2,14 +2,14 @@
 # Full-stack application: Backend (Node.js + Express) serving Frontend (Static files)
 
 # ==================================
-# Stage 1: Build Backend Dependencies
+# Stage 1: Build Dependencies
 # ==================================
-FROM node:22-alpine AS backend-builder
+FROM node:22-alpine AS builder
 
-WORKDIR /app/backend
+WORKDIR /app
 
-# Copy backend package files
-COPY BackEnd/package*.json ./
+# Copy package files from root
+COPY package*.json ./
 
 # Install production dependencies only
 RUN npm install --omit=dev
@@ -25,11 +25,14 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy backend dependencies from builder
-COPY --from=backend-builder /app/backend/node_modules ./BackEnd/node_modules
+# Copy dependencies from builder
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy backend source code
 COPY BackEnd ./BackEnd
+
+# Copy package.json to root (needed for imports)
+COPY package.json ./
 
 # Copy frontend files (static assets)
 COPY FrontEnd ./FrontEnd
@@ -51,5 +54,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 ENV NODE_ENV=production
 
 # Start the application server (serves both API and static files)
-WORKDIR /app/BackEnd
-CMD ["node", "src/app.js"]
+CMD ["node", "BackEnd/src/app.js"]
