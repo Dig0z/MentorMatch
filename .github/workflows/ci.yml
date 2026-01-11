@@ -144,8 +144,11 @@ jobs:
             -e DB_USER=test \
             -e DB_PASSWORD=test \
             -e JWT_SECRET=test_secret_key_for_ci \
+            -e SENDGRID_API_KEY=SG.test_key_for_ci_only \
+            -e GOOGLE_CLIENT_ID=test_client_id \
+            -e GOOGLE_CLIENT_SECRET=test_client_secret \
+            -e GOOGLE_REDIRECT_URI=http://localhost:5000/callback \
             -e PORT=5000 \
-            -e NODE_ENV=test \
             mentormatch:ci-${{ github.sha }}
           
           echo "Waiting for container to be healthy..."
