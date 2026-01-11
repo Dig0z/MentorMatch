@@ -182,12 +182,10 @@ jobs:
             "DB_PASSWORD"
             "JWT_SECRET"
             "SENDGRID_API_KEY"
-            "FROM_EMAIL"
             "GOOGLE_CLIENT_ID"
             "GOOGLE_CLIENT_SECRET"
             "GOOGLE_REDIRECT_URI"
             "PORT"
-            "NODE_ENV"
           )
           
           missing_vars=()
