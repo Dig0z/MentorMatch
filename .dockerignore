@@ -1,0 +1,67 @@
+# Ignore version control
+.git
+.gitignore
+
+# Ignore node modules (will be installed in container)
+node_modules
+BackEnd/node_modules
+**/node_modules
+
+# Ignore environment files (must be provided at runtime)
+.env
+.env.*
+*.env
+BackEnd/.env
+sendgrid.env
+sendgrid.env.ps1
+
+# Ignore logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Ignore IDE/editor files
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# Ignore test files
+BackEnd/test
+**/test
+*.test.js
+*.spec.js
+
+# Ignore development documentation
+*.md
+
+# Ignore wireframes and design files
+FrontEnd/wireframe
+
+# Ignore database files (schema should be applied separately)
+DataBase/migrations
+DataBase/*.md
+
+# Ignore build artifacts
+dist
+build
+coverage
+.cache
+
+# Ignore temporary files
+tmp
+temp
+*.tmp

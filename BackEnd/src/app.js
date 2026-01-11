@@ -11,8 +11,24 @@ require('./config/db.js');
 app.use(cors());
 app.use(express.json());
 
+// Serve static frontend files
+const frontendPath = path.resolve(__dirname, '..', '..', 'FrontEnd');
+app.use(express.static(frontendPath));
+
+// API routes
 const routes = require('./routes.js');
 app.use('/api', routes);
+
+// Serve index.html for any other routes (SPA fallback)
+app.get('*', (req, res, next) => {
+    // Skip if it's an API route
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+    // Serve Home.html as the default page
+    res.sendFile(path.join(frontendPath, 'Pages', 'Home.html'));
+});
+
 app.use(exception_handler);
 
 bootstrap(app).catch(err => {
