@@ -20,7 +20,7 @@ const routes = require('./routes.js');
 app.use('/api', routes);
 
 // Serve index.html for any other routes (SPA fallback)
-app.get('*', (req, res, next) => {
+app.get('(.*)', (req, res, next) => {
     // Skip if it's an API route
     if (req.path.startsWith('/api')) {
         return next();
