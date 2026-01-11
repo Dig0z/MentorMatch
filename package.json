@@ -1,9 +1,9 @@
 {
   "scripts": {
-    "start": "node src/app.js",
+    "start": "node BackEnd/src/app.js",
     "test": "jest",
-    "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix"
+    "lint": "eslint BackEnd/src/**/*.js",
+    "lint:fix": "eslint BackEnd/src/**/*.js --fix"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
