@@ -44,7 +44,7 @@ jobs:
           files=(
             "Dockerfile"
             ".dockerignore"
-            ".env.example"
+            "BackEnd/.env.example"
             "BackEnd/src/app.js"
             "BackEnd/src/bootstrap.js"
             "package.json"
@@ -192,7 +192,7 @@ jobs:
           
           missing_vars=()
           for var in "${required_vars[@]}"; do
-            if ! grep -q "^${var}=" .env.example && ! grep -q "^# ${var}=" .env.example; then
+            if ! grep -q "^${var}=" BackEnd/.env.example && ! grep -q "^# ${var}=" BackEnd/.env.example; then
               missing_vars+=("$var")
               echo "::error::Missing required variable: $var"
             else
