@@ -15,9 +15,9 @@ app.use(express.json());
 const routes = require('./routes.js');
 app.use('/api', routes);
 
-// Serve static frontend files
-const frontendPath = path.join(__dirname, '..', '..', 'FrontEnd');
-app.use(express.static(frontendPath));
+// // Serve static frontend files
+// const frontendPath = path.join(__dirname, '..', '..', 'FrontEnd');
+// app.use(express.static(frontendPath));
 
 app.use(exception_handler);
 
